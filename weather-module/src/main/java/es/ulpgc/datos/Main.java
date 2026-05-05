@@ -1,28 +1,22 @@
 package es.ulpgc.datos;
 
 import es.ulpgc.datos.feeder.OpenWeatherMapFeeder;
-import es.ulpgc.datos.store.CompositeWeatherStore;
-import es.ulpgc.datos.store.DatabaseWeatherStore;
 import es.ulpgc.datos.store.WeatherEventStore;
 
 public class Main {
 
     public static void main(String[] args) {
-        if (args.length < 3) {
-            System.out.println("Uso: Main <api-url> <database-name> <broker-url>");
+        if (args.length < 2) {
+            System.out.println("Uso: Main <api-url> <broker-url>");
             return;
         }
 
         String apiUrl = args[0];
-        String databaseName = args[1];
-        String brokerUrl = args[2];
+        String brokerUrl = args[1];
 
         Controller controller = new Controller(
                 new OpenWeatherMapFeeder(apiUrl),
-                new CompositeWeatherStore(
-                        new DatabaseWeatherStore(databaseName),
-                        new WeatherEventStore(brokerUrl)
-                )
+                new WeatherEventStore(brokerUrl)
         );
         controller.start();
     }
