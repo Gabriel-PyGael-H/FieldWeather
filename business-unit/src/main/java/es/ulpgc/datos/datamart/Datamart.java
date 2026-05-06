@@ -35,7 +35,8 @@ public class Datamart {
                     temperature REAL,
                     humidity    INTEGER,
                     description TEXT,
-                    captured_at TEXT
+                    captured_at TEXT,
+                    prediction_time TEXT
                 );
                 """;
         try (Statement stmt = conn.createStatement()) {
@@ -46,7 +47,7 @@ public class Datamart {
     }
 
     public synchronized void insertMatchWeather(String homeTeam, String awayTeam, int homeScore, int awayScore,
-                                                String matchDate, String city, double temperature, int humidity,
+                                                String matchDate, String city, Double temperature, Integer humidity,
                                                 String description, String capturedAt) {
         String checkSql = "SELECT COUNT(*) FROM match_weather WHERE home_team = ? AND away_team = ? AND match_date = ?";
         String insertSql = """
@@ -70,8 +71,13 @@ public class Datamart {
                 pstmt.setInt(4, awayScore);
                 pstmt.setString(5, matchDate);
                 pstmt.setString(6, city);
-                pstmt.setDouble(7, temperature);
-                pstmt.setInt(8, humidity);
+
+                if (temperature != null) pstmt.setDouble(7, temperature);
+                else pstmt.setNull(7, java.sql.Types.REAL);
+
+                if (humidity != null) pstmt.setInt(8, humidity);
+                else pstmt.setNull(8, java.sql.Types.INTEGER);
+
                 pstmt.setString(9, description);
                 pstmt.setString(10, capturedAt);
                 pstmt.executeUpdate();
@@ -81,16 +87,28 @@ public class Datamart {
         }
     }
 
-    public synchronized void updateWeather(String city, double temperature, int humidity, String description) {
-        String sql = "UPDATE match_weather SET temperature = ?, humidity = ?, description = ? WHERE city = ?";
+    public synchronized void updateWeather(String city, double temperature, int humidity, String description, String predictionTime) {
+        String sql = """
+                UPDATE match_weather 
+                SET temperature = ?, humidity = ?, description = ?, prediction_time = ? 
+                WHERE city = ? 
+                AND SUBSTR(match_date, 1, 13) = SUBSTR(?, 1, 13)
+                """;
+
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDouble(1, temperature);
             pstmt.setInt(2, humidity);
             pstmt.setString(3, description);
-            pstmt.setString(4, city);
-            pstmt.executeUpdate();
+            pstmt.setString(4, predictionTime);
+            pstmt.setString(5, city);
+            pstmt.setString(6, predictionTime);
+
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println(" Weather updated for" + city + " at" + predictionTime);
+            }
         } catch (SQLException e) {
-            System.err.println("Error actualizando clima: " + e.getMessage());
+            System.err.println("Error updating weather: " + e.getMessage());
         }
     }
 

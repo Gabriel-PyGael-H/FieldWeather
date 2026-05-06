@@ -2,9 +2,10 @@ package es.ulpgc.datos.model;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
-import java.time.format.DateTimeFormatter;
 import com.google.gson.JsonElement;
 import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class WeatherMapper {
 
     public List<Weather> map(JsonObject json) {
         List<Weather> forecasts = new ArrayList<>();
+        String ts = Instant.now().toString();
 
         JsonObject cityObject = json.getAsJsonObject("city");
         String city = cityObject.get("name").getAsString();
@@ -39,7 +41,8 @@ public class WeatherMapper {
                     .get(0).getAsJsonObject()
                     .get("description").getAsString();
 
-            forecasts.add(new Weather(city, temperature, feelsLike, humidity, description, country, dateTime));
+            forecasts.add(new Weather(city, temperature, feelsLike, humidity,
+                    description, country, dateTime, ts));
         }
 
         return forecasts;

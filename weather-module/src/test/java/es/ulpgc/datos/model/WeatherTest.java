@@ -1,4 +1,5 @@
 package es.ulpgc.datos.model;
+
 import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
@@ -6,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class WeatherTest {
     private Weather createSampleWeather() {
         LocalDateTime testDate = LocalDateTime.of(2024, 5, 12, 21, 0);
-        return new Weather("Madrid", 10.79, 9.5, 45, "clear sky", "ES", testDate);
+        return new Weather("Madrid", 10.79, 9.5, 45, "clear sky", "ES", testDate, "2026-05-06T21:00:00Z");
     }
 
     @Test

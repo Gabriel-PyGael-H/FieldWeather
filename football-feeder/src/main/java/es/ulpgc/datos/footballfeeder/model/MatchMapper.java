@@ -44,6 +44,7 @@ public class MatchMapper {
             default -> "Unknown";
         };
 
-        return new Match(homeTeam, awayTeam, homeScore, awayScore, status, competition, matchDate, city);
+        String ts = java.time.Instant.now().toString();
+        return new Match(homeTeam, awayTeam, homeScore, awayScore, status, competition, matchDate, city, ts);
     }
 }

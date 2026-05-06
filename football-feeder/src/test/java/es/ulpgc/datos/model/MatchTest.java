@@ -9,7 +9,7 @@ class MatchTest {
 
     private Match createSampleMatch() {
         return new Match("Athletic Club", "Real Betis", 2, 1,
-                "FINISHED", "Primera Division", LocalDateTime.of(2026, 3, 22, 20, 0));
+                "FINISHED", "Primera Division", LocalDateTime.of(2026, 3, 22, 20, 0), "Bilbao", "2026-05-06T18:00:00Z");
     }
 
     @Test

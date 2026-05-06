@@ -18,7 +18,7 @@ public class EventConsumer {
 
     public void subscribe(String topicName) {
         new Thread(() -> {
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
                 try {
                     ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
                     Connection connection = factory.createConnection();
@@ -29,6 +29,8 @@ public class EventConsumer {
                     Topic topic = session.createTopic(topicName);
                     MessageConsumer consumer = session.createDurableSubscriber(topic, "sub-" + topicName);
 
+                    System.out.println("Subscribed to topic: " + topicName);
+
                     while (true) {
                         Message message = consumer.receive();
                         if (message instanceof TextMessage textMessage) {
@@ -36,11 +38,12 @@ public class EventConsumer {
                                 JsonObject event = JsonParser.parseString(textMessage.getText()).getAsJsonObject();
                                 processEvent(topicName, event);
                             } catch (Exception e) {
-                                System.err.println("Error procesando mensaje: " + e.getMessage());
+                                System.err.println("Error processing message: " + e.getMessage());
                             }
                         }
                     }
                 } catch (JMSException e) {
+                    System.err.println("JMS Error in " + topicName + ": " + e.getMessage());
                     try { Thread.sleep(5000); } catch (InterruptedException ie) { break; }
                 }
             }
@@ -50,22 +53,31 @@ public class EventConsumer {
     private void processEvent(String topic, JsonObject event) {
         if (topic.equals("Football")) {
             String home = event.get("homeTeam").getAsString();
-            String date = event.get("matchDate").toString().replace("\"", "");
+            // matchDate is used as the primary time reference
+            String matchDate = event.get("matchDate").getAsString();
+
             datamart.insertMatchWeather(
                     home,
                     event.get("awayTeam").getAsString(),
                     event.get("homeScore").getAsInt(),
                     event.get("awayScore").getAsInt(),
-                    date,
+                    matchDate,
                     getCityForTeam(home),
-                    0, 0, "N/A", date
+                    null,
+                    null,
+                    "No weather data available for this date yet",
+                    event.get("ts").getAsString()
             );
         } else if (topic.equals("Weather")) {
+            // We use predictionTime to match the weather event to the correct match slot
+            String predictionTime = event.get("predictionTime").getAsString();
+
             datamart.updateWeather(
                     event.get("city").getAsString(),
                     event.get("temperature").getAsDouble(),
                     event.get("humidity").getAsInt(),
-                    event.get("description").getAsString()
+                    event.get("description").getAsString(),
+                    predictionTime
             );
         }
     }
@@ -74,12 +86,12 @@ public class EventConsumer {
         return switch (team) {
             case "Real Madrid CF", "Club Atlético de Madrid", "Getafe CF", "Rayo Vallecano de Madrid" -> "Madrid";
             case "FC Barcelona", "RCD Espanyol de Barcelona" -> "Barcelona";
-            case "Sevilla FC", "Real Betis Balompié" -> "Seville";
+            case "Sevilla FC", "Real Betis Balompié" -> "Sevilla"; // Using the Spanish name for consistency
             case "Valencia CF", "Levante UD" -> "Valencia";
             case "Athletic Club" -> "Bilbao";
             case "Girona FC" -> "Girona";
             case "CA Osasuna" -> "Pamplona";
-            case "RCD Mallorca" -> "Palma";
+            case "RCD Mallorca" -> "Palma de Mallorca";
             case "Real Sociedad de Fútbol" -> "San Sebastian";
             case "Villarreal CF" -> "Villarreal";
             case "RC Celta de Vigo" -> "Vigo";

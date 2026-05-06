@@ -24,6 +24,7 @@ public class DatabaseWeatherStore implements WeatherStore {
                     humidity        INTEGER,
                     description     TEXT,
                     prediction_time TEXT NOT NULL,
+                    captured_at     TEXT,
                     PRIMARY KEY (city, prediction_time)
                 );
                 """;
@@ -38,10 +39,11 @@ public class DatabaseWeatherStore implements WeatherStore {
     @Override
     public void store(List<Weather> weatherList) {
         String sql = """
-                INSERT OR REPLACE INTO weather
-                    (city, country, temperature, feels_like, humidity, description, prediction_time)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """;
+            INSERT OR REPLACE INTO weather
+                (city, country, temperature, feels_like, humidity, description, prediction_time, captured_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
         try (Connection conn = DriverManager.getConnection(dbUrl);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -55,6 +57,8 @@ public class DatabaseWeatherStore implements WeatherStore {
                 pstmt.setInt(5, weather.getHumidity());
                 pstmt.setString(6, weather.getDescription());
                 pstmt.setString(7, weather.getPredictionTime().toString());
+                pstmt.setString(8, weather.getTs());
+
                 pstmt.addBatch();
             }
             pstmt.executeBatch();

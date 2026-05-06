@@ -54,7 +54,6 @@ class WeatherMapperTest {
     @Test
     void mapsListSize() {
         List<Weather> result = mapper.map(sampleJson());
-        // Como solo pusimos un elemento en "list", el tamaño debe ser 1
         assertEquals(1, result.size());
     }
 }

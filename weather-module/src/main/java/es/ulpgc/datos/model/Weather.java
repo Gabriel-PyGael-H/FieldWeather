@@ -10,9 +10,10 @@ public class Weather {
     private String description;
     private String country;
     private LocalDateTime predictionTime;
+    private String ts;
 
     public Weather(String city, double temperature, double feelsLike,
-                   int humidity, String description, String country, LocalDateTime predictionTime) {
+                   int humidity, String description, String country, LocalDateTime predictionTime, String ts) {
         this.city = city;
         this.temperature = temperature;
         this.feelsLike = feelsLike;
@@ -20,6 +21,7 @@ public class Weather {
         this.description = description;
         this.country = country;
         this.predictionTime = predictionTime;
+        this.ts = ts;
     }
 
     public String getCity()           { return city; }
@@ -29,10 +31,12 @@ public class Weather {
     public String getDescription()    { return description; }
     public String getCountry()        { return country; }
     public LocalDateTime getPredictionTime() {return predictionTime;}
+    public String getTs() { return ts; }
 
     @Override
     public String toString() {
-        return city + " (" + country + ") - " + temperature + "°C, " + description
-                + ", Humidity: " + humidity + "%";
+        return city + " (" + country + ") - " + temperature + "°C, " +
+                description + " | Captured: " + ts;
     }
+
 }

@@ -76,4 +76,10 @@ class MatchMapperTest {
         Match match = mapper.map(sampleMatchJson());
         assertNotNull(match.getCapturedAt());
     }
+
+    @Test
+    void mapReturnsCorrectCity() {
+        Match match = mapper.map(sampleMatchJson());
+        assertEquals("Madrid", match.getCity());
+    }
 }

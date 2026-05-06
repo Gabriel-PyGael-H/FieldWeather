@@ -10,12 +10,13 @@ public class Match {
     private int awayScore;
     private String status;
     private String competition;
-    private LocalDateTime matchDate; // Esta es la hora real del partido (ej. 19:30)
-    private LocalDateTime capturedAt;
+    private LocalDateTime matchDate;
+    private String capturedAt;
     private String city;
 
+
     public Match(String homeTeam, String awayTeam, int homeScore, int awayScore,
-                 String status, String competition, LocalDateTime matchDate, String city) {
+                 String status, String competition, LocalDateTime matchDate, String city, String capturedAt) {
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
         this.homeScore = homeScore;
@@ -24,7 +25,7 @@ public class Match {
         this.competition = competition;
         this.matchDate = matchDate;
         this.city = city;
-        this.capturedAt = LocalDateTime.now(); // Captura local para log/control
+        this.capturedAt = capturedAt;
     }
 
     public String getHomeTeam()        { return homeTeam; }
@@ -34,12 +35,12 @@ public class Match {
     public String getStatus()          { return status; }
     public String getCompetition()     { return competition; }
     public LocalDateTime getMatchDate()   { return matchDate; }
-    public LocalDateTime getCapturedAt()  { return capturedAt; }
+    public String getCapturedAt()  { return capturedAt; }
     public String getCity() { return city; }
 
     @Override
     public String toString() {
         return homeTeam + " " + homeScore + " - " + awayScore + " " + awayTeam
-                + " [" + status + "] (" + city + ") " + matchDate;
+                + " [" + status + "] (" + city + ") " + matchDate + " | Captured UTC: " + capturedAt;
     }
 }

@@ -39,20 +39,20 @@ public class HistoryLoader {
                     if (topic.equals("Football")) {
                         String home = event.get("homeTeam").getAsString();
                         String away = event.get("awayTeam").getAsString();
-
-                        // Extraer fecha: GSON guarda LocalDateTime como objeto o string.
-                        String date = event.get("matchDate").toString().replace("\"", "");
+                        String date = event.get("matchDate").getAsString();
 
                         int hScore = event.get("homeScore").getAsInt();
                         int aScore = event.get("awayScore").getAsInt();
+                        String ts = event.get("ts").getAsString();
 
-                        datamart.insertMatchWeather(home, away, hScore, aScore, date, getCityForTeam(home), 0, 0, "N/A", date);
+                        datamart.insertMatchWeather(home, away, hScore, aScore, date, getCityForTeam(home), null, null, "No weather data available yet", ts);
                     } else if (topic.equals("Weather")) {
                         datamart.updateWeather(
                                 event.get("city").getAsString(),
                                 event.get("temperature").getAsDouble(),
                                 event.get("humidity").getAsInt(),
-                                event.get("description").getAsString()
+                                event.get("description").getAsString(),
+                                event.get("predictionTime").getAsString()
                         );
                     }
                 } catch (Exception e) {
@@ -68,7 +68,7 @@ public class HistoryLoader {
         return switch (team) {
             case "Real Madrid CF", "Club Atlético de Madrid", "Getafe CF", "Rayo Vallecano de Madrid" -> "Madrid";
             case "FC Barcelona", "RCD Espanyol de Barcelona" -> "Barcelona";
-            case "Sevilla FC", "Real Betis Balompié" -> "Seville";
+            case "Sevilla FC", "Real Betis Balompié" -> "Sevilla";
             case "Valencia CF", "Levante UD" -> "Valencia";
             case "Athletic Club" -> "Bilbao";
             case "Girona FC" -> "Girona";
@@ -77,7 +77,7 @@ public class HistoryLoader {
             case "Real Sociedad de Fútbol" -> "San Sebastian";
             case "Villarreal CF" -> "Villarreal";
             case "RC Celta de Vigo" -> "Vigo";
-            case "Deportivo Alavés" -> "Vitoria-Gasteiz";
+            case "Deportivo Alavés" -> "Vitoria";
             case "Elche CF" -> "Elche";
             case "Real Oviedo" -> "Oviedo";
             default -> "Unknown";
