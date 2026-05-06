@@ -12,9 +12,10 @@ public class Match {
     private String competition;
     private LocalDateTime matchDate;
     private LocalDateTime capturedAt;
+    private String city;
 
     public Match(String homeTeam, String awayTeam, int homeScore, int awayScore,
-                 String status, String competition, LocalDateTime matchDate) {
+                 String status, String competition, LocalDateTime matchDate, String city) {
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
         this.homeScore = homeScore;
@@ -22,6 +23,7 @@ public class Match {
         this.status = status;
         this.competition = competition;
         this.matchDate = matchDate;
+        this.city = city;
         this.capturedAt = LocalDateTime.now();
     }
 
@@ -33,6 +35,7 @@ public class Match {
     public String getCompetition()     { return competition; }
     public LocalDateTime getMatchDate()   { return matchDate; }
     public LocalDateTime getCapturedAt()  { return capturedAt; }
+    public String getCity() { return city; }
 
     @Override
     public String toString() {

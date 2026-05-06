@@ -33,7 +33,8 @@ public class OpenWeatherMapFeeder implements WeatherFeeder {
             try {
                 String json = fetchJson(city);
                 JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
-                results.add(mapper.map(jsonObject));
+                results.addAll(mapper.map(jsonObject));
+
             } catch (IOException | InterruptedException e) {
                 System.err.println("Error al obtener datos de " + city + ": " + e.getMessage());
             }

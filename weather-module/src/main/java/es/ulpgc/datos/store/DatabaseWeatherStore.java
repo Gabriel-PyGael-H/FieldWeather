@@ -51,7 +51,7 @@ public class DatabaseWeatherStore implements WeatherStore {
                 pstmt.setDouble(4, weather.getFeelsLike());
                 pstmt.setInt(5, weather.getHumidity());
                 pstmt.setString(6, weather.getDescription());
-                pstmt.setString(7, weather.getCapturedAt().toString());
+                pstmt.setString(7, weather.getPredictionTime().toString());
                 pstmt.executeUpdate();
             }
             System.out.println("Guardados " + weatherList.size() + " registros en la base de datos.");

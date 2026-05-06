@@ -56,7 +56,8 @@ public class MatchEventStore implements MatchStore{
                 match.getAwayScore(),
                 match.getStatus(),
                 match.getCompetition(),
-                match.getMatchDate().toString()
+                match.getMatchDate().toString(),
+                match.getCity()
         );
         return gson.toJson(event);
     }
@@ -70,6 +71,7 @@ public class MatchEventStore implements MatchStore{
             int awayScore,
             String status,
             String competition,
-            String matchDate
+            String matchDate,
+            String city
     ) {}
 }
