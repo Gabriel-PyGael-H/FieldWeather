@@ -33,7 +33,7 @@ public class WeatherEventStore implements WeatherStore {
 
             for (Weather weather : weatherList) {
                 WeatherEvent event = new WeatherEvent(
-                        weather.getCapturedAt().withNano(0).toString() + "Z",
+                        weather.getPredictionTime().withNano(0).toString() + "Z",
                         SOURCE_ID,
                         weather.getCity(),
                         weather.getCountry(),

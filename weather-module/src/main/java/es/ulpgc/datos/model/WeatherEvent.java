@@ -2,8 +2,8 @@ package es.ulpgc.datos.model;
 
 public class WeatherEvent {
 
-    private final String ts;   // timestamp en UTC
-    private final String ss;   // identificador de la fuente
+    private final String ts;
+    private final String ss;
     private final String city;
     private final String country;
     private final double temperature;

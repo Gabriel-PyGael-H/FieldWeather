@@ -1,22 +1,47 @@
 package es.ulpgc.datos.model;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import java.time.format.DateTimeFormatter;
+import com.google.gson.JsonElement;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class WeatherMapper {
 
-    public Weather map(JsonObject json) {
-        String city = json.get("name").getAsString();
-        String country = json.getAsJsonObject("sys").get("country").getAsString();
+    private static final DateTimeFormatter API_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        JsonObject main = json.getAsJsonObject("main");
-        double temperature = main.get("temp").getAsDouble();
-        double feelsLike = main.get("feels_like").getAsDouble();
-        int humidity = main.get("humidity").getAsInt();
+    public List<Weather> map(JsonObject json) {
+        List<Weather> forecasts = new ArrayList<>();
 
-        String description = json.getAsJsonArray("weather")
-                .get(0).getAsJsonObject()
-                .get("description").getAsString();
+        JsonObject cityObject = json.getAsJsonObject("city");
+        String city = cityObject.get("name").getAsString();
+        String country = cityObject.get("country").getAsString();
 
-        return new Weather(city, temperature, feelsLike, humidity, description, country);
+        JsonArray list = json.getAsJsonArray("list");
+
+        for (JsonElement element : list) {
+            JsonObject f = element.getAsJsonObject();
+
+            String dtTxt = f.get("dt_txt").getAsString();
+            LocalDateTime dateTime = LocalDateTime.parse(dtTxt, API_FORMATTER)
+                    .withSecond(0)
+                    .withNano(0);
+
+            JsonObject main = f.getAsJsonObject("main");
+            double temperature = main.get("temp").getAsDouble();
+            double feelsLike = main.get("feels_like").getAsDouble();
+            int humidity = main.get("humidity").getAsInt();
+
+            String description = f.getAsJsonArray("weather")
+                    .get(0).getAsJsonObject()
+                    .get("description").getAsString();
+
+            forecasts.add(new Weather(city, temperature, feelsLike, humidity, description, country, dateTime));
+        }
+
+        return forecasts;
     }
 }
