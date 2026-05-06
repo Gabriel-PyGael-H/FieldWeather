@@ -1,5 +1,4 @@
 package es.ulpgc.datos.footballfeeder.control;
-
 import es.ulpgc.datos.footballfeeder.control.feeder.FootballFeeder;
 import es.ulpgc.datos.footballfeeder.model.Match;
 import es.ulpgc.datos.footballfeeder.control.store.MatchStore;
