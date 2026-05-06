@@ -10,7 +10,7 @@ public class Match {
     private int awayScore;
     private String status;
     private String competition;
-    private LocalDateTime matchDate;
+    private LocalDateTime matchDate; // Esta es la hora real del partido (ej. 19:30)
     private LocalDateTime capturedAt;
     private String city;
 
@@ -24,7 +24,7 @@ public class Match {
         this.competition = competition;
         this.matchDate = matchDate;
         this.city = city;
-        this.capturedAt = LocalDateTime.now();
+        this.capturedAt = LocalDateTime.now(); // Captura local para log/control
     }
 
     public String getHomeTeam()        { return homeTeam; }
@@ -40,6 +40,6 @@ public class Match {
     @Override
     public String toString() {
         return homeTeam + " " + homeScore + " - " + awayScore + " " + awayTeam
-                + " [" + status + "] " + matchDate;
+                + " [" + status + "] (" + city + ") " + matchDate;
     }
 }

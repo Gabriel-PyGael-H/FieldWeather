@@ -6,12 +6,13 @@ import es.ulpgc.datos.model.WeatherEvent;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
+import java.time.Instant;
 import java.util.List;
 
 public class WeatherEventStore implements WeatherStore {
 
     private static final String TOPIC_NAME = "Weather";
-    private static final String SOURCE_ID = "weather-feeder";
+    private static final String SOURCE_ID = "weather-feeder-v1";
 
     private final String brokerUrl;
     private final Gson gson = new Gson();
@@ -32,22 +33,25 @@ public class WeatherEventStore implements WeatherStore {
             MessageProducer producer = session.createProducer(destination);
 
             for (Weather weather : weatherList) {
+                String ts = Instant.now().toString();
+
                 WeatherEvent event = new WeatherEvent(
-                        weather.getPredictionTime().withNano(0).toString() + "Z",
+                        ts,
                         SOURCE_ID,
                         weather.getCity(),
                         weather.getCountry(),
                         weather.getTemperature(),
                         weather.getFeelsLike(),
                         weather.getHumidity(),
-                        weather.getDescription()
+                        weather.getDescription(),
+                        weather.getPredictionTime().toString()
                 );
+
                 String json = gson.toJson(event);
                 TextMessage message = session.createTextMessage(json);
                 producer.send(message);
             }
-
-            System.out.println("Publicados " + weatherList.size() + " eventos en el topic " + TOPIC_NAME);
+            System.out.println("Publicados " + weatherList.size() + " eventos de clima en el topic " + TOPIC_NAME);
 
             producer.close();
             session.close();

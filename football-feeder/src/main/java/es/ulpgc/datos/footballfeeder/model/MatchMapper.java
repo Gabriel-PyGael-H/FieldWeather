@@ -2,11 +2,14 @@ package es.ulpgc.datos.footballfeeder.model;
 
 import com.google.gson.JsonObject;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class MatchMapper {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
+    private static final ZoneId SPAIN_ZONE = ZoneId.of("Europe/Madrid");
 
     public Match map(JsonObject m) {
         String homeTeam = m.getAsJsonObject("homeTeam").get("name").getAsString();
@@ -18,9 +21,11 @@ public class MatchMapper {
 
         String status = m.get("status").getAsString();
         String competition = m.getAsJsonObject("competition").get("name").getAsString();
-        LocalDateTime matchDate = LocalDateTime.parse(m.get("utcDate").getAsString(), FORMATTER);
 
-        // Lógica de ciudad integrada
+
+        ZonedDateTime utcTime = ZonedDateTime.parse(m.get("utcDate").getAsString(), FORMATTER);
+        LocalDateTime matchDate = utcTime.withZoneSameInstant(SPAIN_ZONE).toLocalDateTime();
+
         String city = switch (homeTeam) {
             case "Real Madrid CF", "Club Atlético de Madrid", "Getafe CF", "Rayo Vallecano de Madrid" -> "Madrid";
             case "FC Barcelona", "RCD Espanyol de Barcelona" -> "Barcelona";

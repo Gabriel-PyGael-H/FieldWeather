@@ -10,9 +10,11 @@ public class WeatherEvent {
     private final double feelsLike;
     private final int humidity;
     private final String description;
+    private final String predictionTime;
 
     public WeatherEvent(String ts, String ss, String city, String country,
-                        double temperature, double feelsLike, int humidity, String description) {
+                        double temperature, double feelsLike, int humidity,
+                        String description, String predictionTime) {
         this.ts = ts;
         this.ss = ss;
         this.city = city;
@@ -21,6 +23,7 @@ public class WeatherEvent {
         this.feelsLike = feelsLike;
         this.humidity = humidity;
         this.description = description;
+        this.predictionTime = predictionTime;
     }
 
     public String getTs() { return ts; }
@@ -31,4 +34,5 @@ public class WeatherEvent {
     public double getFeelsLike() { return feelsLike; }
     public int getHumidity() { return humidity; }
     public String getDescription() { return description; }
+    public String getPredictionTime() { return predictionTime; }
 }
