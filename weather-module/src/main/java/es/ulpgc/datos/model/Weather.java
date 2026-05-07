@@ -24,6 +24,10 @@ public class Weather {
         this.ts = ts;
     }
 
+    public void setCity(String city) {
+        this.city = city;
+    }
+
     public String getCity()           { return city; }
     public double getTemperature()    { return temperature; }
     public double getFeelsLike()      { return feelsLike; }

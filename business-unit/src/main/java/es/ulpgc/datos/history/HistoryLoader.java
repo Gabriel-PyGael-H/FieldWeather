@@ -40,15 +40,17 @@ public class HistoryLoader {
                         String home = event.get("homeTeam").getAsString();
                         String away = event.get("awayTeam").getAsString();
                         String date = event.get("matchDate").getAsString();
-
                         int hScore = event.get("homeScore").getAsInt();
                         int aScore = event.get("awayScore").getAsInt();
                         String ts = event.get("ts").getAsString();
 
                         datamart.insertMatchWeather(home, away, hScore, aScore, date, getCityForTeam(home), null, null, "No weather data available yet", ts);
                     } else if (topic.equals("Weather")) {
+                        String rawCity = event.get("city").getAsString();
+                        String normalizedCity = normalizeWeatherCity(rawCity);
+
                         datamart.updateWeather(
-                                event.get("city").getAsString(),
+                                normalizedCity,
                                 event.get("temperature").getAsDouble(),
                                 event.get("humidity").getAsInt(),
                                 event.get("description").getAsString(),
@@ -62,6 +64,16 @@ public class HistoryLoader {
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
+    }
+
+    private String normalizeWeatherCity(String city) {
+        return switch (city) {
+            case "Palma", "Palma de Mallorca" -> "Palma de Mallorca";
+            case "Seville", "Sevilla" -> "Sevilla";
+            case "Vitoria-Gasteiz", "Vitoria" -> "Vitoria";
+            case "San Sebastián", "San Sebastian" -> "San Sebastian";
+            default -> city;
+        };
     }
 
     private String getCityForTeam(String team) {

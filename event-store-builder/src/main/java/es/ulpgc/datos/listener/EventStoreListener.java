@@ -37,8 +37,6 @@ public class EventStoreListener {
                         if (message instanceof TextMessage textMessage) {
                             String json = textMessage.getText();
                             JsonObject event = JsonParser.parseString(json).getAsJsonObject();
-
-                            // Extraemos metadatos para organizar el archivo
                             String ts = event.get("ts").getAsString();
                             String ss = event.get("ss").getAsString();
 

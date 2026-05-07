@@ -92,7 +92,7 @@ public class Datamart {
                 UPDATE match_weather 
                 SET temperature = ?, humidity = ?, description = ?, prediction_time = ? 
                 WHERE city = ? 
-                AND SUBSTR(match_date, 1, 13) = SUBSTR(?, 1, 13)
+                AND SUBSTR(match_date, 1, 10) = SUBSTR(?, 1, 10)
                 """;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -113,13 +113,13 @@ public class Datamart {
     }
 
     public synchronized ResultSet queryByCity(String city) throws SQLException {
-        PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM match_weather WHERE city = ? ORDER BY match_date DESC");
+        PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM match_weather WHERE city = ? ORDER BY match_date ASC");
         pstmt.setString(1, city);
         return pstmt.executeQuery();
     }
 
     public synchronized ResultSet queryByTeam(String team) throws SQLException {
-        PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM match_weather WHERE home_team = ? OR away_team = ? ORDER BY match_date DESC");
+        PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM match_weather WHERE home_team = ? OR away_team = ? ORDER BY match_date ASC");
         pstmt.setString(1, team);
         pstmt.setString(2, team);
         return pstmt.executeQuery();
@@ -133,11 +133,11 @@ public class Datamart {
 
     public synchronized ResultSet queryRainyMatches() throws SQLException {
         Statement stmt = conn.createStatement();
-        return stmt.executeQuery("SELECT * FROM match_weather WHERE description LIKE '%rain%' OR description LIKE '%drizzle%' ORDER BY match_date DESC");
+        return stmt.executeQuery("SELECT * FROM match_weather WHERE description LIKE '%rain%' OR description LIKE '%drizzle%' ORDER BY match_date ASC");
     }
 
     public synchronized ResultSet queryAll() throws SQLException {
         Statement stmt = conn.createStatement();
-        return stmt.executeQuery("SELECT * FROM match_weather ORDER BY match_date DESC");
+        return stmt.executeQuery("SELECT * FROM match_weather ORDER BY match_date ASC");
     }
 }

@@ -12,11 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OpenWeatherMapFeeder implements WeatherFeeder {
-
     private static final List<String> CITIES = List.of(
-            "Madrid", "Barcelona", "Seville", "Valencia", "Bilbao",
+            "Madrid", "Barcelona", "Sevilla", "Valencia", "Bilbao",
             "Girona", "Pamplona", "Palma de Mallorca", "San Sebastian",
-            "Villarreal", "Vigo", "Vitoria-Gasteiz", "Elche", "Oviedo"
+            "Villarreal", "Vigo", "Vitoria", "Elche", "Oviedo"
     );
 
     private final WeatherMapper mapper = new WeatherMapper();
@@ -33,7 +32,13 @@ public class OpenWeatherMapFeeder implements WeatherFeeder {
             try {
                 String json = fetchJson(city);
                 JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
-                results.addAll(mapper.map(jsonObject));
+
+                List<Weather> weatherList = mapper.map(jsonObject);
+                for (Weather weather : weatherList) {
+                    weather.setCity(city);
+                }
+
+                results.addAll(weatherList);
 
             } catch (IOException | InterruptedException e) {
                 System.err.println("Error al obtener datos de " + city + ": " + e.getMessage());
