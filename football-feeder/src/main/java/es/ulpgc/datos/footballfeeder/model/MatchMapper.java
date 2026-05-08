@@ -36,7 +36,7 @@ public class MatchMapper {
             case "CA Osasuna" -> "Pamplona";
             case "RCD Mallorca" -> "Palma de Mallorca";
             case "Real Sociedad de Fútbol" -> "San Sebastian";
-            case "Villarreal CF" -> "Villarreal";
+            case "Villarreal CF" -> "Castellón";
             case "RC Celta de Vigo" -> "Vigo";
             case "Deportivo Alavés" -> "Vitoria-Gasteiz";
             case "Elche CF" -> "Elche";

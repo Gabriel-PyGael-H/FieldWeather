@@ -56,14 +56,15 @@ public class HistoryLoader {
             case "Real Madrid CF", "Club Atlético de Madrid", "Getafe CF", "Rayo Vallecano de Madrid" -> "Madrid";
             case "FC Barcelona", "RCD Espanyol de Barcelona" -> "Barcelona";
             case "Sevilla FC", "Real Betis Balompié" -> "Sevilla";
-            case "Valencia CF", "Villarreal CF", "Levante UD" -> "Valencia";
+            case "Valencia CF", "Levante UD" -> "Valencia";
+            case "Villarreal CF" -> "Castellón";
             case "Athletic Club" -> "Bilbao";
             case "Real Sociedad de Fútbol" -> "San Sebastian";
             case "RC Celta de Vigo" -> "Vigo";
             case "CA Osasuna" -> "Pamplona";
             case "RCD Mallorca" -> "Palma de Mallorca";
             case "Girona FC" -> "Girona";
-            case "Deportivo Alavés" -> "Vitoria";
+            case "Deportivo Alavés" -> "Vitoria-Gasteiz";
             case "Elche CF" -> "Elche";
             case "Real Oviedo" -> "Oviedo";
             default -> "Unknown";
