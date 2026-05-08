@@ -45,7 +45,7 @@ public class HistoryLoader {
 
     public static String normalize(String city) {
         if (city.contains("Palma")) return "Palma de Mallorca";
-        if (city.contains("Sevill")) return "Sevilla";
+        if (city.contains("Seville")) return "Sevilla";
         if (city.contains("Vitoria")) return "Vitoria";
         if (city.contains("San Sebastian") || city.contains("Sebastián")) return "San Sebastian";
         return city;
@@ -56,7 +56,7 @@ public class HistoryLoader {
             case "Real Madrid CF", "Club Atlético de Madrid", "Getafe CF", "Rayo Vallecano de Madrid" -> "Madrid";
             case "FC Barcelona", "RCD Espanyol de Barcelona" -> "Barcelona";
             case "Sevilla FC", "Real Betis Balompié" -> "Sevilla";
-            case "Valencia CF", "Villarreal CF" -> "Valencia";
+            case "Valencia CF", "Villarreal CF", "Levante UD" -> "Valencia";
             case "Athletic Club" -> "Bilbao";
             case "Real Sociedad de Fútbol" -> "San Sebastian";
             case "RC Celta de Vigo" -> "Vigo";
