@@ -1,4 +1,4 @@
-package es.ulpgc.datos.model;
+package es.ulpgc.datos.weatherfeeder.model;
 
 public class WeatherEvent {
 

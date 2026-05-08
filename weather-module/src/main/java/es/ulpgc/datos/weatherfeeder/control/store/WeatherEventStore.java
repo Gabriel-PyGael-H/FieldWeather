@@ -1,8 +1,8 @@
-package es.ulpgc.datos.store;
+package es.ulpgc.datos.weatherfeeder.control.store;
 
 import com.google.gson.Gson;
-import es.ulpgc.datos.model.Weather;
-import es.ulpgc.datos.model.WeatherEvent;
+import es.ulpgc.datos.weatherfeeder.model.Weather;
+import es.ulpgc.datos.weatherfeeder.model.WeatherEvent;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;

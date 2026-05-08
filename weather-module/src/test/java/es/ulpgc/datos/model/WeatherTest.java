@@ -1,5 +1,6 @@
 package es.ulpgc.datos.model;
 
+import es.ulpgc.datos.weatherfeeder.model.Weather;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;

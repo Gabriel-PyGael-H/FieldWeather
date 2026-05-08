@@ -1,9 +1,9 @@
-package es.ulpgc.datos.feeder;
+package es.ulpgc.datos.weatherfeeder.control.feeder;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import es.ulpgc.datos.model.Weather;
-import es.ulpgc.datos.model.WeatherMapper;
+import es.ulpgc.datos.weatherfeeder.model.Weather;
+import es.ulpgc.datos.weatherfeeder.model.WeatherMapper;
 
 import java.io.IOException;
 import java.net.URI;

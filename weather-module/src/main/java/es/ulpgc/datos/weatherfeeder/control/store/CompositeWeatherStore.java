@@ -1,6 +1,6 @@
-package es.ulpgc.datos.store;
+package es.ulpgc.datos.weatherfeeder.control.store;
 
-import es.ulpgc.datos.model.Weather;
+import es.ulpgc.datos.weatherfeeder.model.Weather;
 import java.util.List;
 
 public class CompositeWeatherStore implements WeatherStore {

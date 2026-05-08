@@ -3,8 +3,10 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import es.ulpgc.datos.weatherfeeder.model.Weather;
+import es.ulpgc.datos.weatherfeeder.model.WeatherMapper;
 import org.junit.jupiter.api.Test;
-import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class WeatherMapperTest {

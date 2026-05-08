@@ -1,7 +1,8 @@
-package es.ulpgc.datos;
+package es.ulpgc.datos.weatherfeeder;
 
-import es.ulpgc.datos.feeder.OpenWeatherMapFeeder;
-import es.ulpgc.datos.store.WeatherEventStore;
+import es.ulpgc.datos.weatherfeeder.control.Controller;
+import es.ulpgc.datos.weatherfeeder.control.feeder.OpenWeatherMapFeeder;
+import es.ulpgc.datos.weatherfeeder.control.store.WeatherEventStore;
 
 public class Main {
 

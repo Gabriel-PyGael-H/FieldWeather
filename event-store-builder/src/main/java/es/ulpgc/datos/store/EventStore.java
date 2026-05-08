@@ -1,10 +1,9 @@
 package es.ulpgc.datos.store;
 
-import java.io.IOException;
+
 import java.nio.file.*;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 
 public class EventStore {
 

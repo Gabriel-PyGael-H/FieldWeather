@@ -1,8 +1,8 @@
-package es.ulpgc.datos;
+package es.ulpgc.datos.weatherfeeder.control;
 
-import es.ulpgc.datos.feeder.WeatherFeeder;
-import es.ulpgc.datos.model.Weather;
-import es.ulpgc.datos.store.WeatherStore;
+import es.ulpgc.datos.weatherfeeder.control.feeder.WeatherFeeder;
+import es.ulpgc.datos.weatherfeeder.model.Weather;
+import es.ulpgc.datos.weatherfeeder.control.store.WeatherStore;
 
 import java.util.List;
 import java.util.concurrent.Executors;
