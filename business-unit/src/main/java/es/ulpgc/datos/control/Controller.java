@@ -17,33 +17,12 @@ public class Controller {
     }
 
     public void registerRoutes(Javalin app) {
-        getmatches(app);
-        getMatchesByCity(app);
-        getMatchesByTeam(app);
-        getWeatherByCity(app);
-        getRainAlerts(app);
-
-        app.get("/recommend/{team}", this::getRecommendation);
-    }
-
-    private void getRainAlerts(Javalin app) {
-        app.get("/alerts/rain", this::getRainAlerts);
-    }
-
-    private void getWeatherByCity(Javalin app) {
-        app.get("/weather/{city}", this::getWeatherByCity);
-    }
-
-    private void getMatchesByTeam(Javalin app) {
-        app.get("/matches/team/{team}", this::getMatchesByTeam);
-    }
-
-    private void getMatchesByCity(Javalin app) {
-        app.get("/matches/{city}", this::getMatchesByCity);
-    }
-
-    private void getmatches(Javalin app) {
         app.get("/matches", this::getMatches);
+        app.get("/matches/{city}", this::getMatchesByCity);
+        app.get("/matches/team/{team}", this::getMatchesByTeam);
+        app.get("/weather/{city}", this::getWeatherByCity);
+        app.get("/alerts/rain", this::getRainAlerts);
+        app.get("/recommend/{team}", this::getRecommendation);
     }
 
     private void getMatches(Context ctx) throws SQLException {
@@ -78,6 +57,7 @@ public class Controller {
     private void getRainAlerts(Context ctx) throws SQLException {
         ctx.json(resultSetToJson(datamart.queryRainyMatches()).toString());
     }
+
     private void getRecommendation(Context ctx) throws SQLException {
         String team = ctx.pathParam("team");
         String now = LocalDateTime.now().toString();
@@ -91,13 +71,15 @@ public class Controller {
                 res.addProperty("team", team);
                 res.addProperty("date", matchDate);
                 res.addProperty("city", rs.getString("city"));
+
                 double t = rs.getDouble("temperature");
                 String d = rs.getString("description");
                 res.addProperty("weather", t + "°C, " + d);
 
-                String rec = "Enjoy the match!";
-                if (d.toLowerCase().contains("rain")) rec = "Take an umbrella!";
-                else if (t < 15) rec = "Wear a warm coat!";
+                // Lógica de recomendación Business Unit
+                String rec = "¡Disfruta del partido!";
+                if (d.toLowerCase().contains("rain")) rec = "¡Lleva paraguas! Se espera lluvia.";
+                else if (t < 15) rec = "¡Abrígate! Hará frío en el estadio.";
 
                 res.addProperty("recommendation", rec);
                 ctx.json(res.toString());
@@ -105,7 +87,7 @@ public class Controller {
                 break;
             }
         }
-        if (!found) ctx.status(404).result("No upcoming matches.");
+        if (!found) ctx.status(404).result("No hay partidos próximos para " + team);
     }
 
     private JsonArray resultSetToJson(ResultSet rs) throws SQLException {

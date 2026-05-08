@@ -31,7 +31,7 @@ public class HistoryLoader {
                             String home = event.get("homeTeam").getAsString();
                             datamart.insertMatchWeather(home, event.get("awayTeam").getAsString(),
                                     event.get("homeScore").getAsInt(), event.get("awayScore").getAsInt(),
-                                    event.get("matchDate").getAsString(), getCityForTeam(home), null, null, "Historical data", event.get("ts").getAsString());
+                                    event.get("matchDate").getAsString(), getCityForTeam(home.trim()), null, null, "Historical data", event.get("ts").getAsString());
                         } else {
                             datamart.updateWeather(normalize(event.get("city").getAsString()),
                                     event.get("temperature").getAsDouble(), event.get("humidity").getAsInt(),

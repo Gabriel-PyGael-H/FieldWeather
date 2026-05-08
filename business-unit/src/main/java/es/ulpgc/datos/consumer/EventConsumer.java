@@ -42,7 +42,7 @@ public class EventConsumer {
             String home = event.get("homeTeam").getAsString();
             datamart.insertMatchWeather(home, event.get("awayTeam").getAsString(),
                     event.get("homeScore").getAsInt(), event.get("awayScore").getAsInt(),
-                    event.get("matchDate").getAsString(), HistoryLoader.getCityForTeam(home),
+                    event.get("matchDate").getAsString(), HistoryLoader.getCityForTeam(home.trim()),
                     null, null, "Live data", event.get("ts").getAsString());
         } else if (topic.equals("Weather")) {
             datamart.updateWeather(HistoryLoader.normalize(event.get("city").getAsString()),
