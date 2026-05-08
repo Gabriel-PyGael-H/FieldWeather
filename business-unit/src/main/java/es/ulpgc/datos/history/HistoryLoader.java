@@ -23,72 +23,46 @@ public class HistoryLoader {
     private void loadFromPath(Path basePath, String topic) {
         if (!Files.exists(basePath)) return;
         try (var stream = Files.walk(basePath)) {
-            stream.filter(p -> p.toString().endsWith(".events"))
-                    .forEach(file -> loadFile(file, topic));
-        } catch (IOException e) {
-            System.err.println("Error en ruta: " + e.getMessage());
-        }
-    }
-
-    private void loadFile(Path file, String topic) {
-        try {
-            Files.lines(file).forEach(line -> {
+            stream.filter(p -> p.toString().endsWith(".events")).forEach(file -> {
                 try {
-                    if (line.isBlank()) return;
-                    JsonObject event = JsonParser.parseString(line).getAsJsonObject();
-                    if (topic.equals("Football")) {
-                        String home = event.get("homeTeam").getAsString();
-                        String away = event.get("awayTeam").getAsString();
-                        String date = event.get("matchDate").getAsString();
-                        int hScore = event.get("homeScore").getAsInt();
-                        int aScore = event.get("awayScore").getAsInt();
-                        String ts = event.get("ts").getAsString();
-
-                        datamart.insertMatchWeather(home, away, hScore, aScore, date, getCityForTeam(home), null, null, "No weather data available yet", ts);
-                    } else if (topic.equals("Weather")) {
-                        String rawCity = event.get("city").getAsString();
-                        String normalizedCity = normalizeWeatherCity(rawCity);
-
-                        datamart.updateWeather(
-                                normalizedCity,
-                                event.get("temperature").getAsDouble(),
-                                event.get("humidity").getAsInt(),
-                                event.get("description").getAsString(),
-                                event.get("predictionTime").getAsString()
-                        );
-                    }
-                } catch (Exception e) {
-                    System.err.println("Línea corrupta en " + file.getFileName() + ": " + e.getMessage());
-                }
+                    Files.lines(file).filter(l -> !l.isBlank()).forEach(line -> {
+                        JsonObject event = JsonParser.parseString(line).getAsJsonObject();
+                        if (topic.equals("Football")) {
+                            String home = event.get("homeTeam").getAsString();
+                            datamart.insertMatchWeather(home, event.get("awayTeam").getAsString(),
+                                    event.get("homeScore").getAsInt(), event.get("awayScore").getAsInt(),
+                                    event.get("matchDate").getAsString(), getCityForTeam(home), null, null, "Historical data", event.get("ts").getAsString());
+                        } else {
+                            datamart.updateWeather(normalize(event.get("city").getAsString()),
+                                    event.get("temperature").getAsDouble(), event.get("humidity").getAsInt(),
+                                    event.get("description").getAsString(), event.get("predictionTime").getAsString());
+                        }
+                    });
+                } catch (Exception ignored) {}
             });
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
-    private String normalizeWeatherCity(String city) {
-        return switch (city) {
-            case "Palma", "Palma de Mallorca" -> "Palma de Mallorca";
-            case "Seville", "Sevilla" -> "Sevilla";
-            case "Vitoria-Gasteiz", "Vitoria" -> "Vitoria";
-            case "San Sebastián", "San Sebastian" -> "San Sebastian";
-            default -> city;
-        };
+    public static String normalize(String city) {
+        if (city.contains("Palma")) return "Palma de Mallorca";
+        if (city.contains("Sevill")) return "Sevilla";
+        if (city.contains("Vitoria")) return "Vitoria";
+        if (city.contains("San Sebastian") || city.contains("Sebastián")) return "San Sebastian";
+        return city;
     }
 
-    private String getCityForTeam(String team) {
+    public static String getCityForTeam(String team) {
         return switch (team) {
             case "Real Madrid CF", "Club Atlético de Madrid", "Getafe CF", "Rayo Vallecano de Madrid" -> "Madrid";
             case "FC Barcelona", "RCD Espanyol de Barcelona" -> "Barcelona";
             case "Sevilla FC", "Real Betis Balompié" -> "Sevilla";
-            case "Valencia CF", "Levante UD" -> "Valencia";
+            case "Valencia CF", "Villarreal CF" -> "Valencia";
             case "Athletic Club" -> "Bilbao";
-            case "Girona FC" -> "Girona";
+            case "Real Sociedad de Fútbol" -> "San Sebastian";
+            case "RC Celta de Vigo" -> "Vigo";
             case "CA Osasuna" -> "Pamplona";
             case "RCD Mallorca" -> "Palma de Mallorca";
-            case "Real Sociedad de Fútbol" -> "San Sebastian";
-            case "Villarreal CF" -> "Villarreal";
-            case "RC Celta de Vigo" -> "Vigo";
+            case "Girona FC" -> "Girona";
             case "Deportivo Alavés" -> "Vitoria";
             case "Elche CF" -> "Elche";
             case "Real Oviedo" -> "Oviedo";

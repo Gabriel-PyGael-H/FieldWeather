@@ -6,30 +6,17 @@ import es.ulpgc.datos.datamart.Datamart;
 import es.ulpgc.datos.history.HistoryLoader;
 
 public class Main {
-
     public static void main(String[] args) {
-        if (args.length < 3) {
-            System.out.println("Uso: Main <broker-url> <eventstore-path> <datamart-path>");
-            return;
-        }
+        if (args.length < 3) return;
 
-        String brokerUrl = args[0];
-        String eventStorePath = args[1];
-        String datamartPath = args[2];
+        Datamart datamart = new Datamart(args[2]);
 
-        Datamart datamart = new Datamart(datamartPath);
+        new HistoryLoader(datamart, args[1]).loadFootballHistory();
 
-        System.out.println("Cargando histórico...");
-        HistoryLoader loader = new HistoryLoader(datamart, eventStorePath);
-        loader.loadFootballHistory();
-
-        System.out.println("Suscribiendo a eventos en tiempo real...");
-        EventConsumer consumer = new EventConsumer(brokerUrl, datamart);
+        EventConsumer consumer = new EventConsumer(args[0], datamart);
         consumer.subscribe("Football");
         consumer.subscribe("Weather");
 
-        System.out.println("Iniciando API REST...");
-        RestApi api = new RestApi(datamart);
-        api.start(7070);
+        new RestApi(datamart).start(7070);
     }
 }
