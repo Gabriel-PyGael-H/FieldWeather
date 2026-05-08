@@ -12,7 +12,7 @@
     <modules>
         <module>football-feeder</module>
         <module>event-store-builder</module>
-        <module>weather-module</module>
+        <module>weather-feeder</module>
         <module>business-unit</module>
     </modules>
 

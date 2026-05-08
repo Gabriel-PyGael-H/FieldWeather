@@ -11,7 +11,7 @@
 
     </parent>
 
-    <artifactId>weather-module</artifactId>
+    <artifactId>weather-feeder</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
