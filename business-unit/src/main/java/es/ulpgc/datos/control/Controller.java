@@ -15,10 +15,13 @@ public class Controller {
     public void registerRoutes(Javalin app) {
         app.get("/matches", ctx -> ctx.json(datamart.getAllMatches().toString()));
 
-        app.get("/matches/{city}", ctx -> {
-            ctx.json(datamart.getMatchesByCity(ctx.pathParam("city")).toString());
-        });
+        app.get("/weather/{city}", ctx -> {
+            String city = ctx.pathParam("city");
+            String jsonResponse = datamart.getMatchesByCity(city).toString();
 
+            ctx.contentType("application/json");
+            ctx.result(jsonResponse);
+        });
         app.get("/recommend/{team}", this::getRecommendation);
     }
 
