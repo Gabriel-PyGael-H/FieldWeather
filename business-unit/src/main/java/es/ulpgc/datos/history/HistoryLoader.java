@@ -58,7 +58,7 @@ public class HistoryLoader {
         if (city.contains("Palma")) return "Palma de Mallorca";
         if (city.contains("Seville")) return "Sevilla";
         if (city.contains("Vitoria")) return "Vitoria-Gasteiz";
-        if (city.contains("Castell")) return "Castellon";
+        if (city.contains("Castell")) return "Castellón";
         if (city.contains("San Sebastian") || city.contains("Sebastián")) return "San Sebastian";
         return city;
     }
