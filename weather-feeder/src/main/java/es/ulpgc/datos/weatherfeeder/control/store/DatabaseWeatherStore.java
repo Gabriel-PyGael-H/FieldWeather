@@ -1,7 +1,6 @@
 package es.ulpgc.datos.weatherfeeder.control.store;
 
-import es.ulpgc.datos.weatherfeeder.model.Weather;
-
+import es.ulpgc.datos.weatherfeeder.model.WeatherEvent; // Usamos la clase fusionada
 import java.sql.*;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class DatabaseWeatherStore implements WeatherStore {
     }
 
     @Override
-    public void store(List<Weather> weatherList) {
+    public void store(List<WeatherEvent> weatherList) { // <--- CAMBIO: Lista de WeatherEvent
         String sql = """
             INSERT OR REPLACE INTO weather
                 (city, country, temperature, feels_like, humidity, description, prediction_time, captured_at)
@@ -49,21 +48,21 @@ public class DatabaseWeatherStore implements WeatherStore {
 
             conn.setAutoCommit(false);
 
-            for (Weather weather : weatherList) {
+            for (WeatherEvent weather : weatherList) { // <--- CAMBIO: Iteramos sobre WeatherEvent
                 pstmt.setString(1, weather.getCity());
                 pstmt.setString(2, weather.getCountry());
                 pstmt.setDouble(3, weather.getTemperature());
                 pstmt.setDouble(4, weather.getFeelsLike());
                 pstmt.setInt(5, weather.getHumidity());
                 pstmt.setString(6, weather.getDescription());
-                pstmt.setString(7, weather.getPredictionTime().toString());
+                pstmt.setString(7, weather.getPredictionTime()); // Ya es String en WeatherEvent
                 pstmt.setString(8, weather.getTs());
 
                 pstmt.addBatch();
             }
             pstmt.executeBatch();
             conn.commit();
-            System.out.println("Sincronizados " + weatherList.size() + " registros climáticos.");
+            System.out.println("Sincronizados " + weatherList.size() + " registros climáticos en el Store local.");
 
         } catch (SQLException e) {
             System.err.println("Error al guardar en la base de datos: " + e.getMessage());

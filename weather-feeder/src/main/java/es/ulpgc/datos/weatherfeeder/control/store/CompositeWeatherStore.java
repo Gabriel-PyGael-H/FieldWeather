@@ -1,6 +1,6 @@
 package es.ulpgc.datos.weatherfeeder.control.store;
 
-import es.ulpgc.datos.weatherfeeder.model.Weather;
+import es.ulpgc.datos.weatherfeeder.model.WeatherEvent; // Importamos la clase fusionada
 import java.util.List;
 
 public class CompositeWeatherStore implements WeatherStore {
@@ -14,7 +14,7 @@ public class CompositeWeatherStore implements WeatherStore {
     }
 
     @Override
-    public void store(List<Weather> weatherList) {
+    public void store(List<WeatherEvent> weatherList) { // <--- CAMBIO: Ahora recibe WeatherEvent
         dbStore.store(weatherList);
         eventStore.store(weatherList);
     }
