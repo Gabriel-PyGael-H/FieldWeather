@@ -1,8 +1,8 @@
 package es.ulpgc.datos.weatherfeeder.control;
 
 import es.ulpgc.datos.weatherfeeder.control.feeder.WeatherFeeder;
-import es.ulpgc.datos.weatherfeeder.model.Weather;
 import es.ulpgc.datos.weatherfeeder.control.store.WeatherStore;
+import es.ulpgc.datos.weatherfeeder.model.WeatherEvent;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -27,7 +27,7 @@ public class Controller {
 
     private void fetch() {
         System.out.println("Obteniendo datos meteorológicos...");
-        List<Weather> weatherList = feeder.fetchWeather();
+        List<WeatherEvent> weatherList = feeder.fetchWeather();
         System.out.println("Ciudades obtenidas: " + weatherList.size());
         weatherList.forEach(System.out::println);
         store.store(weatherList);

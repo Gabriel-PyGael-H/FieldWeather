@@ -2,6 +2,7 @@ package es.ulpgc.datos.weatherfeeder.control.feeder;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import es.ulpgc.datos.weatherfeeder.model.WeatherEvent;
 import es.ulpgc.datos.weatherfeeder.model.WeatherMapper;
 
 import java.io.IOException;
@@ -25,15 +26,15 @@ public class OpenWeatherMapFeeder implements WeatherFeeder {
     }
 
     @Override
-    public List<Weather> fetchWeather() {
-        List<Weather> results = new ArrayList<>();
+    public List<WeatherEvent> fetchWeather() {
+        List<WeatherEvent> results = new ArrayList<>();
         for (String city : CITIES) {
             try {
                 String json = fetchJson(city);
                 JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
 
-                List<Weather> weatherList = mapper.map(jsonObject);
-                for (Weather weather : weatherList) {
+                List<WeatherEvent> weatherList = mapper.map(jsonObject);
+                for (WeatherEvent weather : weatherList) {
                     weather.setCity(city);
                 }
 

@@ -4,14 +4,12 @@ public class WeatherEvent {
     private final String ts;
     private final String ss;
 
-    private final String city;
+    private String city;
     private final String country;
-
     private final double temperature;
     private final double feelsLike;
     private final int humidity;
     private final String description;
-
     private final String predictionTime;
 
     public WeatherEvent(String ts, String ss, String city, String country,
@@ -27,6 +25,8 @@ public class WeatherEvent {
         this.description = description;
         this.predictionTime = predictionTime;
     }
+
+    public void setCity(String city) { this.city = city; }
 
     public String getTs() { return ts; }
     public String getSs() { return ss; }
