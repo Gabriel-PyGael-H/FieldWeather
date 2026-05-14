@@ -1,7 +1,7 @@
-package es.ulpgc.datos.api;
+package es.ulpgc.datos.view;
 
 import es.ulpgc.datos.control.Controller;
-import es.ulpgc.datos.datamart.Datamart;
+import es.ulpgc.datos.model.Datamart;
 import io.javalin.Javalin;
 
 public class RestApi {
