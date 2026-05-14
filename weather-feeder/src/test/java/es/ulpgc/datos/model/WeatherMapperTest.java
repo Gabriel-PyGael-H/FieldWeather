@@ -1,17 +1,18 @@
 package es.ulpgc.datos.model;
-import java.util.List;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import es.ulpgc.datos.weatherfeeder.model.Weather;
+import es.ulpgc.datos.weatherfeeder.model.WeatherEvent;
 import es.ulpgc.datos.weatherfeeder.model.WeatherMapper;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class WeatherMapperTest {
 
     private final WeatherMapper mapper = new WeatherMapper();
+
     private JsonObject sampleJson() {
         String json = """
             {
@@ -36,26 +37,26 @@ class WeatherMapperTest {
 
     @Test
     void mapsCityCorrectly() {
-        List<Weather> result = mapper.map(sampleJson());
+        List<WeatherEvent> result = mapper.map(sampleJson());
         assertEquals("Madrid", result.get(0).getCity());
     }
 
     @Test
     void mapsDateTimeCorrectly() {
-        List<Weather> result = mapper.map(sampleJson());
+        List<WeatherEvent> result = mapper.map(sampleJson());
         assertNotNull(result.get(0).getPredictionTime());
-        assertEquals(21, result.get(0).getPredictionTime().getHour());
+        assertTrue(result.get(0).getPredictionTime().contains("21:00:00"));
     }
 
     @Test
     void mapsTemperatureCorrectly() {
-        List<Weather> result = mapper.map(sampleJson());
+        List<WeatherEvent> result = mapper.map(sampleJson());
         assertEquals(20.5, result.get(0).getTemperature());
     }
 
     @Test
     void mapsListSize() {
-        List<Weather> result = mapper.map(sampleJson());
+        List<WeatherEvent> result = mapper.map(sampleJson());
         assertEquals(1, result.size());
     }
 }
