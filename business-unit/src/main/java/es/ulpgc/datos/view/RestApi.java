@@ -1,6 +1,5 @@
 package es.ulpgc.datos.view;
 
-import es.ulpgc.datos.control.Controller;
 import es.ulpgc.datos.model.Datamart;
 import io.javalin.Javalin;
 
@@ -17,7 +16,25 @@ public class RestApi {
             config.plugins.enableCors(cors -> cors.add(it -> it.anyHost()));
         }).start(port);
 
-        new Controller(datamart).registerRoutes(app);
+        app.get("/recommend/{team}", ctx -> {
+            var res = datamart.getRecommendation(ctx.pathParam("team"));
+            if (res != null) {
+                ctx.contentType("application/json");
+                ctx.result(res.toString());
+            } else {
+                ctx.status(404).result("No hay partidos próximos.");
+            }
+        });
+
+        app.get("/matches", ctx -> {
+            ctx.contentType("application/json");
+            ctx.result(datamart.getAllMatches().toString());
+        });
+
+        app.get("/weather/{city}", ctx -> {
+            ctx.contentType("application/json");
+            ctx.result(datamart.getMatchesByCity(ctx.pathParam("city")).toString());
+        });
 
         System.out.println("Business Unit operativa en http://localhost:" + port);
     }

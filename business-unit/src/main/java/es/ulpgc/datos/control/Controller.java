@@ -1,21 +1,20 @@
 package es.ulpgc.datos.control;
 
 import es.ulpgc.datos.model.Datamart;
-import io.javalin.Javalin;
+import es.ulpgc.datos.view.RestApi;
 
 public class Controller {
     private final Datamart datamart;
+    private final RestApi restApi;
 
-    public Controller(Datamart datamart) { this.datamart = datamart; }
+    public Controller(Datamart datamart) {
+        this.datamart = datamart;
+        this.restApi = new RestApi(datamart);
+    }
 
-    public void registerRoutes(Javalin app) {
-        app.get("/recommend/{team}", ctx -> {
-            var res = datamart.getRecommendation(ctx.pathParam("team"));
-            if (res != null) ctx.json(res.toString());
-            else ctx.status(404).result("No hay partidos próximos.");
-        });
+    public void start(int port) {
+        restApi.start(port);
 
-        app.get("/matches", ctx -> ctx.json(datamart.getAllMatches().toString()));
-        app.get("/weather/{city}", ctx -> ctx.json(datamart.getMatchesByCity(ctx.pathParam("city")).toString()));
+        System.out.println("Complejos del sistema inicializados correctamente.");
     }
 }
