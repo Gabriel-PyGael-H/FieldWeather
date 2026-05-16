@@ -34,11 +34,7 @@ public class Datamart {
 
     public synchronized void insertMatchWeather(String home, String away, int hScore, int aScore, String date, String city, Double temp, Integer hum, String desc, String captured) {
         if (date == null || date.length() < 10) return;
-
-        // Extraemos solo el día (YYYY-MM-DD) para el filtro
         String dayFilter = date.substring(0, 10) + "%";
-
-        // BLINDAJE: Buscamos si ya existe ese mismo emparejamiento EN EL MISMO DÍA
         String check = "SELECT id FROM match_weather WHERE home_team=? AND away_team=? AND match_date LIKE ?";
         try (PreparedStatement ps = conn.prepareStatement(check)) {
             ps.setString(1, home);
@@ -47,7 +43,6 @@ public class Datamart {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                // Si el partido ya existe en esa fecha, actualizamos el marcador final, la fecha y la ciudad
                 int existingId = rs.getInt("id");
                 String updateScore = "UPDATE match_weather SET home_score=?, away_score=?, match_date=?, city=? WHERE id=?";
                 try (PreparedStatement upPs = conn.prepareStatement(updateScore)) {
@@ -58,11 +53,9 @@ public class Datamart {
                     upPs.setInt(5, existingId);
                     upPs.executeUpdate();
                 }
-                return; // Cortamos aquí para evitar que inserte una nueva fila duplicada
+                return;
             }
         } catch (SQLException e) { e.printStackTrace(); return; }
-
-        // Si es la primera vez que vemos este partido este día, lo insertamos limpio
         String sql = "INSERT INTO match_weather (home_team, away_team, home_score, away_score, match_date, city, temperature, humidity, description, captured_at) VALUES (?,?,?,?,?,?,?,?,?,?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, home);
