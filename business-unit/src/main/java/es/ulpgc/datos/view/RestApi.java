@@ -13,13 +13,11 @@ public class RestApi {
 
     public void start(int port) {
         Javalin app = Javalin.create(config -> {
-            config.plugins.enableCors(cors -> {
-                cors.add(it -> it.anyHost());
-            });
+            config.staticFiles.add("/public");
+            config.plugins.enableCors(cors -> cors.add(it -> it.anyHost()));
         }).start(port);
 
-        Controller controller = new Controller(datamart);
-        controller.registerRoutes(app);
+        new Controller(datamart).registerRoutes(app);
 
         System.out.println("Business Unit operativa en http://localhost:" + port);
     }
