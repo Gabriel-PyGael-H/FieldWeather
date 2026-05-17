@@ -6,7 +6,7 @@ Este proyecto es un sistema distribuido que recolecta, guarda y muestra datos co
 
 Propuesta de valor: El sistema cruza las fechas y lugares de los partidos con el pronóstico del tiempo en tiempo real para generar recomendaciones inteligentes de forma automática (por ejemplo, si va a nevar, si hay alertas por calor extremo o si va a llover). Esto ayuda a los aficionados a saber exactamente qué ropa llevar o qué precauciones tomar antes de ir al estadio.
 
-### Justificación de la elección de APIs y estructura del Datamart
+### 2. Justificación de la elección de APIs y estructura del Datamart
 Elección de APIs
 API de Fútbol: Nos da de forma fiable los partidos, los equipos que juegan, las fechas y los resultados en formatos limpios (JSON) para poder extraerlos fácilmente.
 
