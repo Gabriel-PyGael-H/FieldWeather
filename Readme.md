@@ -1,116 +1,151 @@
 # FieldWeather
 Gabriel Pérez Doreste y Gael Hernández Brito
 
-### 1. Descripción del Proyecto y Propuesta de Valor
+### 1. Descripción del proyecto y su propuesta de valor
+Este proyecto es un sistema distribuido que recolecta, guarda y muestra datos combinados de partidos de fútbol y el clima.
 
-FieldWeather es una plataforma orientada a la unificación de datos deportivos y meteorológicos. Su propuesta de valor radica en centralizar en un único cuadro de mando interactivo el calendario de partidos de fútbol junto con la predicción del tiempo en la ciudad donde se disputa cada encuentro.
+Propuesta de valor: El sistema cruza las fechas y lugares de los partidos con el pronóstico del tiempo en tiempo real para generar recomendaciones inteligentes de forma automática (por ejemplo, si va a nevar, si hay alertas por calor extremo o si va a llover). Esto ayuda a los aficionados a saber exactamente qué ropa llevar o qué precauciones tomar antes de ir al estadio.
 
-Esto permite transformar datos complejos en información práctica de alto valor (por ejemplo, recomendaciones automáticas para los asistentes sobre si deben llevar paraguas o abrigo), optimizando la experiencia del usuario al consultar eventos deportivos próximos sin tener que revisar diferentes aplicaciones.
-
-### 2. Justificación de APIs y Estructura del Datamart
-
+### Justificación de la elección de APIs y estructura del Datamart
 Elección de APIs
-Fútbol (football-data.org): Seleccionada por su estabilidad y precisión para la ingesta del calendario completo de encuentros, proporcionando la estructura base de partidos, equipos, fechas y localizaciones de las jornadas de liga.
+API de Fútbol: Nos da de forma fiable los partidos, los equipos que juegan, las fechas y los resultados en formatos limpios (JSON) para poder extraerlos fácilmente.
 
-Meteorología (OpenWeatherMap): Se integra por su cobertura global y fiabilidad para obtener predicciones climáticas en tiempo real indexadas por la ciudad de juego, garantizando la precisión de las condiciones ambientales asociadas a cada partido.
+API del Clima: Nos permite conocer la temperatura, humedad y el pronóstico exacto de la ciudad en la que se juega cada partido justo en las horas cercanas al encuentro.
 
-Estructura del Datamart (SQLite)
-Se ha seleccionado SQLite por su ligereza, rendimiento y nula necesidad de configuración de servidores externos, lo que facilita el despliegue rápido de la Business Unit. El diseño lógico de la base de datos almacena la información limpia y procesada garantizando la unicidad de las entidades:
+Estructura del Datamart
+Hemos elegido SQLite para nuestra base de datos por una razón muy sencilla: funciona directamente sobre un archivo local (datamart.db). No hace falta instalar ni configurar ningún servidor de bases de datos externo en el ordenador, lo que hace que todo sea mucho más rápido de montar.
 
-Evita la duplicidad de registros mediante el control de claves primarias lógicas al procesar los estados de los eventos.
+Además, toda la información se guarda de forma desnormalizada en una única tabla llamada match_weather. Al tener los datos del partido, del tiempo y la recomendación calculada en la misma fila, la API web (Javalin) puede leerlos al instante para mostrárselos al usuario sin ralentizar el sistema con búsquedas complejas.
 
-Estructura tablas optimizadas para lecturas rápidas desde la API, separando la persistencia de partidos de las condiciones climáticas asociadas.
+### 3. Instrucciones de ejecución
+Para arrancar el proyecto en tu ordenador, no necesitas usar líneas de comandos ni terminales complejas. Lo hacemos todo directamente desde el entorno de desarrollo (como IntelliJ IDEA) siguiendo estos pasos:
 
-### 3. Instrucciones claras para compilar y ejecutar cada módulo 
-3. Instrucciones claras para compilar y ejecutar cada módulo
 Requisitos previos
-Java 21 o superior
+Tener Java instalado (Versión 17 o superior).
 
-Apache ActiveMQ corriendo en el puerto 61616
-API key de OpenWeatherMap
+Descargar y arrancar Apache ActiveMQ (el broker de mensajería que usamos para conectar los módulos).
 
-API key de Football-Data.org
+Tener las claves (API Keys) de las plataformas de fútbol y clima.
 
-1. Compilar el proyecto completo
-Desde la raíz del proyecto (donde se encuentra el pom.xml principal), ejecute el siguiente comando para compilar y generar los archivos ejecutables de todos los módulos:  mvn clean install
+Pasos para arrancar el sistema
+Paso 1: Encender ActiveMQ
+Antes de abrir el código, ve a la carpeta donde descargaste ActiveMQ y arráncalo. Esto hará que el puerto tcp://localhost:61616 se quede escuchando los mensajes.
 
-2. Arrancar Apache ActiveMQ
-Descargue ActiveMQ desde https://activemq.apache.org e inicie el servicio en su máquina local:
-# En Windows
-activemq.bat start
+Paso 2: Configurar los parámetros (Arguments) en IntelliJ
+Como el proyecto tiene varios módulos independientes, cada uno tiene su propio archivo Main. Para que funcionen bien, hay que ir a las opciones de ejecución de IntelliJ (arriba a la derecha, en Edit Configurations...), buscar la casilla Program arguments y escribir los datos que necesita cada uno separados por un espacio:
 
-# En Linux/Mac
-./activemq start
+Event Store Builder: Necesita la URL de ActiveMQ y la carpeta donde va a guardar los ficheros de texto.
 
-El broker quedará disponible escuchando en tcp://localhost:61616.
+Ejemplo de argumentos: tcp://localhost:61616 ./eventstore
 
-3. Weather Feeder
-Módulo encargado de publicar las predicciones meteorológicas de las ciudades de LaLiga en el topic Weather. Requiere la URL base de la API con su correspondiente clave de acceso y la dirección del broker:
+Football Feeder: Necesita la clave de la API y la URL de ActiveMQ.
 
-java -jar weather-feeder/target/weather-feeder-1.0-SNAPSHOT.jar \
-  "http://api.openweathermap.org/data/2.5/forecast?q=%s&appid=TU_API_KEY&units=metric&lang=en" \
-  localhost:61616
+Ejemplo de argumentos: tu_api_key_futbol tcp://localhost:61616
 
-  4. Football Feeder
-Módulo encargado de publicar los partidos de LaLiga en el topic Football. Requiere la URL del endpoint, la clave de la API y la dirección del broker:
+Weather Feeder: Necesita la clave de la API y la URL de ActiveMQ.
 
-java -jar football-feeder/target/football-feeder-1.0-SNAPSHOT.jar \
-  "https://api.football-data.org/v4/competitions/PD/matches" \
-  TU_API_KEY \
-  localhost:61616
+Ejemplo de argumentos: tu_api_key_clima tcp://localhost:61616
 
-5. Event Store Builder
-Módulo suscriptor que captura de ActiveMQ todos los eventos entrantes y los almacena de forma inmutable. Requiere la dirección del broker y la ruta relativa de la carpeta de destino:
+Business Unit: Necesita la URL de ActiveMQ, la ruta de la carpeta de eventos y el puerto de la web.
 
-java -jar event-store-builder/target/event-store-builder-1.0-SNAPSHOT.jar \
-  localhost:61616 \
-  eventstore
-Los eventos se estructurarán automáticamente siguiendo el siguiente patrón de almacenamiento inmutable:
-eventstore/
-├── Football/
-│   └── football-feeder/
-│       └── 20250815.events
-└── Weather/
-    └── weather-feeder-v1/
-        └── 20250815.events
+Ejemplo de argumentos: tcp://localhost:61616 ./eventstore 8080
+
+Paso 3: Darle al botón de Play
+Simplemente abre el archivo Main de cada módulo y dale al botón verde de Run / Play en tu entorno de desarrollo. Al estar todos encendidos a la vez, el sistema empezará a funcionar en tiempo real.
 
 
-6. Business Unit
-El componente central de la aplicación. Carga los eventos del pasado almacenados en los ficheros, se conecta al broker para escuchar los eventos del presente en tiempo real y expone el servidor web.
 
-Para ejecutar este módulo de manera correcta (ya sea por terminal o configurando los Program Arguments en su IDE), se deben pasar obligatoriamente tres argumentos separados por espacios:
-java -jar business-unit/target/business-unit-1.0-SNAPSHOT.jar \
-  localhost:61616 \
-  eventstore \
-  7000
+### 3.  Ejemplos de uso
 
-Argumento 1 (broker-url): localhost:61616Dirección del broker para que el EventConsumer escuche los topics de ActiveMQ en vivo.
-Argumento 2 (eventstore-path): eventstoreRuta relativa del directorio de almacenamiento. Al usar una ruta relativa, el HistoryLoader funcionará en cualquier                    entorno local de evaluación para procesar el histórico de ficheros del pasado.
-Argumento 3 (port): 7000 Puerto en el que la RestApi (Javalin) desplegará los endpoints y servirá la interfaz de usuario.
 
-### 4. Ejemplos de uso 
+El sistema está pensado para ejecutarse de forma distribuida desde tu entorno de desarrollo (como IntelliJ IDEA) sin necesidad de usar comandos de consola complejos.
 
-Una vez que la Business Unit esté totalmente operativa en el puerto 7000, puede comprobar el correcto funcionamiento de las consultas al Datamart realizando peticiones HTTP directas usando los siguientes endpoints
+Requisitos previos
+Java 17 o superior instalado.
 
-Obtener todos los partidos procesados en el calendario:
-Endpoint: GET http://localhost:7000/matches
+Apache ActiveMQ (el intermediario que permite a los módulos mandarse mensajes entre sí) descargado y encendido en su puerto por defecto (localhost:61616).
 
-Filtrar partidos e información meteorológica por ciudad:
-Endpoint: GET http://localhost:7000/weather/Madrid
+Configuración de parámetros en IntelliJ
+Cada uno de los 4 módulos tiene su propio archivo Main. Para ejecutarlos, entra en las opciones de configuración de IntelliJ (Edit Configurations...), busca la casilla Program arguments e introduce los datos exactos que necesita tu proyecto separados por un espacio:
 
-Obtener la recomendación climática para el partido de un equipo específico:
-Endpoint: GET http://localhost:7000/recommend/Sevilla
+Event Store Builder: Guarda una copia exacta de todos los mensajes que viajan por el sistema.
 
-Probar la interfaz web
-Para interactuar con la interfaz visual completa de FieldWeather, simplemente se abre el navegador y acceder a la siguiente dirección:
-http://localhost:7000/index.html
+Program arguments: localhost:61616 C:\Users\gabri\IdeaProjects\DacdTrabajo\eventstore
 
-### 5. Arquitectura de sistema y arquitectura de la aplicación
+Football Feeder: Descarga los datos de los partidos y los envía al broker.
 
-### 6. Principios y patrones de diseño aplicados en cada módulo.
-Principio de Responsabilidad Única (SRP): Cada clase tiene una tarea única y bien delimitada. RestApi maneja de forma exclusiva la capa HTTP, EventConsumer se enfoca únicamente en la lectura del broker, y Datamart centraliza los accesos a la base de datos SQLite.
+Program arguments: tu_api_key_futbol localhost:61616
 
-Patrón Arquitectónico de Capas (MVC): Estructuración limpia que separa el almacenamiento (Model), la lógica interna de control (Control) y los componentes de visualización y API hacia el usuario (View).
+Weather Feeder: Descarga el clima y las predicciones y las envía al broker.
 
-Patrón Publicador-Suscriptor (Pub-Sub): Implementado mediante ActiveMQ a nivel de sistema de datos. Este patrón permite desacoplar por completo los Feeders de recolección de los módulos de almacenamiento y procesamiento de la Business Unit, facilitando que el ecosistema del proyecto sea escalable y tolerante a fallos.
+Program arguments: tu_api_key_clima localhost:61616
 
+Business Unit: El cerebro del sistema. Lee los archivos guardados, procesa los nuevos datos en tiempo real, actualiza la base de datos y enciende la web en el puerto 7000.
+
+Program arguments: localhost:61616 C:\Users\gabri\IdeaProjects\DacdTrabajo\eventstore 7000
+
+Orden de arranque: Primero enciende ActiveMQ en tu ordenador. Después, dale al botón de "Play" en tu IDE para ejecutar los 4 módulos (es muy recomendable arrancar la Business Unit e Event Store antes que los Feeders).
+
+
+### 4. Ejemplos de uso (Consultas REST corregidas)
+Cuando la Business Unit esté encendida, puedes abrir el navegador web o usar una herramienta como Postman para hacerle preguntas a los siguientes enlaces (endpoints):
+
+Pedir la recomendación para un equipo: * GET http://localhost:7000/recommend/Real Madrid CF
+
+Te devolverá un JSON como este:
+
+JSON
+{
+  "match": "Real Madrid CF vs FC Barcelona",
+  "date": "2026-10-24 20:00:00",
+  "recommendation": " 🌤️ TIEMPO PERFECTO: Manga corta o sudadera fina. Disfruta del fútbol.",
+  "weather": "20.5°C, clear sky"
+}
+Ver todos los partidos guardados:
+
+GET http://localhost:7000/matches
+
+Ver los partidos de una ciudad concreta:
+
+GET http://localhost:7000/weather/Madrid
+
+Una vez que la Business Unit está en marcha, expone un servicio web en el puerto 7000 (usando el framework Javalin) que devuelve las respuestas en formato limpio JSON.
+
+1. Consultar Recomendación para el próximo partido de un equipo
+Endpoint: GET /recommend/{nombre_del_equipo}
+
+Qué hace por dentro: Busca en la base de datos el partido futuro más cercano de ese equipo (match_date >= tiempo actual) y te da el consejo climático.
+
+Ejemplo de Petición: http://localhost:7000/recommend/Real Madrid CF
+
+Respuesta del sistema:
+
+JSON
+{
+  "match": "Real Madrid CF vs Club Atlético de Madrid",
+  "date": "2026-05-24 21:00:00",
+  "recommendation": " 🌤️ TIEMPO PERFECTO: Sudadera fina o manga corta. Ideal para disfrutar del partido.",
+  "weather": "20.5°C, clear sky"
+}
+2. Consultar el Catálogo Global (Historial + Próximos Partidos)
+Endpoint: GET /matches
+
+Qué hace por dentro: Te devuelve una lista completa con todos los partidos de la base de datos ordenados por fecha. Aquí puedes ver tanto los resultados de los partidos que ya se han jugado como los datos de los que están por jugar.
+
+Ejemplo de Petición: http://localhost:7000/matches
+### 5. Arquitectura de Sistema
+
+<img width="545" height="968" alt="image" src="https://github.com/user-attachments/assets/259d4f50-1cde-4e9a-a31c-7acecda685d9" />
+
+
+
+### 6. Principios y patrones de diseño aplicados
+Para que el código sea limpio y fácil de mantener, hemos seguido varias reglas de diseño:
+
+Responsabilidad Única: Cada clase hace una sola cosa bien hecha. Por ejemplo, RestApi solo se encarga de las rutas web, EventConsumer solo de hablar con ActiveMQ, e HistoryLoader solo de leer los archivos del disco.
+
+Patrón Publicador / Suscriptor: Gracias a ActiveMQ, los feeders envían datos sin saber quién los va a recibir, logrando que si un módulo se apaga, los demás sigan funcionando sin enterarse.
+
+Inyección de Dependencias: No usamos variables globales. La base de datos (Datamart) se crea una sola vez en el Main y se le pasa por el constructor a RestApi, HistoryLoader y EventConsumer para que todos compartan la misma conexión de forma segura.
+
+Separación por Capas (MVC): El código está ordenado limpiamente en paquetes separados según su función: model (los datos), view (la API web de Javalin) y control (la lógica que procesa la información).
