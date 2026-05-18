@@ -55,40 +55,43 @@ Simplemente abre el archivo Main de cada módulo y dale al botón verde de Run /
 
 
 
-### 3.  Ejemplos de uso
+### 3. Instrucciones claras para compilar y ejecutar cada módulo
+
+Requisitos del Entorno
+Java Development Kit (JDK): Versión 17 o superior correctamente configurada en el IDE.
+
+Apache ActiveMQ: Broker de mensajes compatible con JMS, inicializado localmente en su puerto nativo (tcp://localhost:61616).
+
+Configuración de Parámetros de Ejecución (Program Arguments)
+Para simular la topología distribuida dentro del IDE (como IntelliJ IDEA), configure los siguientes argumentos de programa en las opciones de ejecución de cada clase Main (Run ➡️ Edit Configurations... ➡️ Program arguments):
+
+Event Store Builder: * Program arguments: tcp://localhost:61616 ../eventstore
+
+(Registra la secuencia exacta e inmutable de eventos en la ruta relativa especificada).
+
+Business Unit: * Program arguments: tcp://localhost:61616 ../eventstore 7000
+
+(El núcleo analítico. Lee el histórico en frío desde la ruta relativa, procesa el tiempo real y levanta la API web en el puerto 7000).
+
+Football Feeder: * Program arguments: tcp://localhost:61616 https://api.football-data.org/v4/matches?X-Auth-Token=TU_API_KEY
+
+(Conecta al broker local e ingesta los datos deportivos mediante la URL base y su correspondiente API Key).
+
+Weather Feeder: * Program arguments: tcp://localhost:61616 https://api.openweathermap.org/data/2.5/forecast?appid=TU_API_KEY
+
+(Conecta al broker local e ingesta las predicciones meteorológicas enviando los datos en tiempo real).
+
+Protocolo para la Demo Local (Secuencia de Arranque):
+
+Paso 1: Inicie el servidor local de Apache ActiveMQ y asegúrese de que esté escuchando en tcp://localhost:61616.
+
+Paso 2: Ejecute los módulos de persistencia y procesamiento (Event Store Builder y Business Unit). Esto garantiza que las colas y tópicos estén listos para recibir y procesar datos, e inicializa el servicio web en el puerto 7000.
+
+Paso 3: Ejecute los flujos emisores (Football Feeder y Weather Feeder) para comenzar con la ingesta dinámica de datos y comprobar el procesamiento en tiempo real durante la presentación.
 
 
-El sistema está pensado para ejecutarse de forma distribuida desde tu entorno de desarrollo (como IntelliJ IDEA) sin necesidad de usar comandos de consola complejos.
-
-Requisitos previos
-Java 17 o superior instalado.
-
-Apache ActiveMQ (el intermediario que permite a los módulos mandarse mensajes entre sí) descargado y encendido en su puerto por defecto (localhost:61616).
-
-Configuración de parámetros en IntelliJ
-Cada uno de los 4 módulos tiene su propio archivo Main. Para ejecutarlos, entra en las opciones de configuración de IntelliJ (Edit Configurations...), busca la casilla Program arguments e introduce los datos exactos que necesita tu proyecto separados por un espacio:
-
-Event Store Builder: Guarda una copia exacta de todos los mensajes que viajan por el sistema.
-
-Program arguments: localhost:61616 C:\Users\gabri\IdeaProjects\DacdTrabajo\eventstore
-
-Football Feeder: Descarga los datos de los partidos y los envía al broker.
-
-Program arguments: tu_api_key_futbol localhost:61616
-
-Weather Feeder: Descarga el clima y las predicciones y las envía al broker.
-
-Program arguments: tu_api_key_clima localhost:61616
-
-Business Unit: El cerebro del sistema. Lee los archivos guardados, procesa los nuevos datos en tiempo real, actualiza la base de datos y enciende la web en el puerto 7000.
-
-Program arguments: localhost:61616 C:\Users\gabri\IdeaProjects\DacdTrabajo\eventstore 7000
-
-Orden de arranque: Primero enciende ActiveMQ en tu ordenador. Después, dale al botón de "Play" en tu IDE para ejecutar los 4 módulos (es muy recomendable arrancar la Business Unit e Event Store antes que los Feeders).
-
-
-### 4. Ejemplos de uso (Consultas REST corregidas)
-Cuando la Business Unit esté encendida, puedes abrir el navegador web o usar una herramienta como Postman para hacerle preguntas a los siguientes enlaces (endpoints):
+### 4. Ejemplos de uso 
+Una vez que el módulo Business Unit se encuentra en ejecución, inicializa un servicio web ligero en el puerto 7000 impulsado por el framework Javalin. Este servicio expone los datos procesados del Datamart en formato estructurado JSON
 
 Pedir la recomendación para un equipo: * GET http://localhost:7000/recommend/Real Madrid CF
 
@@ -110,28 +113,17 @@ Ver los partidos de una ciudad concreta:
 GET http://localhost:7000/weather/Madrid
 
 Una vez que la Business Unit está en marcha, expone un servicio web en el puerto 7000 (usando el framework Javalin) que devuelve las respuestas en formato limpio JSON.
-
-1. Consultar Recomendación para el próximo partido de un equipo
-Endpoint: GET /recommend/{nombre_del_equipo}
-
-Qué hace por dentro: Busca en la base de datos el partido futuro más cercano de ese equipo (match_date >= tiempo actual) y te da el consejo climático.
-
-Ejemplo de Petición: http://localhost:7000/recommend/Real Madrid CF
-
-Respuesta del sistema:
-
-JSON
-{
+Una vez que el módulo Business Unit se encuentra en ejecución, inicializa un servicio web ligero en el puerto 7000 impulsado por el framework Javalin. Este servicio expone los datos procesados del Datamart en formato estructurado JSON. Las consultas se pueden realizar directamente desde cualquier navegador web, herramientas como Postman, o mediante comandos curl.1. Inferencia Predictiva sobre Partidos FuturosEndpoint: GET /recommend/{nombre_del_equipo}Lógica interna: El sistema filtra los eventos planificados basándose en la marca temporal actual ($match\_date \ge DATETIME('now')$) y recupera la recomendación climática calculada para el encuentro más próximo cronológicamente del equipo solicitado.Ejemplo de Petición: http://localhost:7000/recommend/Real%20Madrid%20CFRespuesta del sistema (JSON):JSON{
   "match": "Real Madrid CF vs Club Atlético de Madrid",
   "date": "2026-05-24 21:00:00",
   "recommendation": " 🌤️ TIEMPO PERFECTO: Sudadera fina o manga corta. Ideal para disfrutar del partido.",
   "weather": "20.5°C, clear sky"
 }
-2. Consultar el Catálogo Global (Historial + Próximos Partidos)
-Endpoint: GET /matches
-
-Qué hace por dentro: Te devuelve una lista completa con todos los partidos de la base de datos ordenados por fecha. Aquí puedes ver tanto los resultados de los partidos que ya se han jugado como los datos de los que están por jugar.
-
+2. Consulta de Estado Meteorológico por UbicaciónEndpoint: GET /weather/{ciudad}Lógica interna:
+Recupera las últimas métricas atmosféricas e interpolaciones predictivas registradas en el Datamart asociadas a una localización geográfica específica.
+Ejemplo de Petición: http://localhost:7000/weather/Madrid
+3. Catálogo Global: GET /matches
+Lógica interna: Devuelve el conjunto completo de registros integrados en el Datamart ordenados cronológicamente. 
 Ejemplo de Petición: http://localhost:7000/matches
 ### 5. Arquitectura de Sistema
 
@@ -142,10 +134,10 @@ Ejemplo de Petición: http://localhost:7000/matches
 ### 6. Principios y patrones de diseño aplicados
 Para que el código sea limpio y fácil de mantener, hemos seguido varias reglas de diseño:
 
-Responsabilidad Única: Cada clase hace una sola cosa bien hecha. Por ejemplo, RestApi solo se encarga de las rutas web, EventConsumer solo de hablar con ActiveMQ, e HistoryLoader solo de leer los archivos del disco.
+Principio de Responsabilidad Única (SRP): Cada componente asume un único rol estrictamente acotado dentro del sistema. RestApi se limita a la gestión de rutas HTTP, EventConsumer a la escucha aislada del broker JMS, HistoryLoader a la lectura secuencial de los eventos en frío y Datamart a la encapsulación de transacciones SQL sobre SQLite.
 
 Patrón Publicador / Suscriptor: Gracias a ActiveMQ, los feeders envían datos sin saber quién los va a recibir, logrando que si un módulo se apaga, los demás sigan funcionando sin enterarse.
 
 Inyección de Dependencias: No usamos variables globales. La base de datos (Datamart) se crea una sola vez en el Main y se le pasa por el constructor a RestApi, HistoryLoader y EventConsumer para que todos compartan la misma conexión de forma segura.
 
-Separación por Capas (MVC): El código está ordenado limpiamente en paquetes separados según su función: model (los datos), view (la API web de Javalin) y control (la lógica que procesa la información).
+Separación por Capas (MVC): El código está ordenado limpiamente en paquetes separados según su función: model (los datos), view (la API web de Javalin) y control (la lógica que procesa la información).Model (estructuras de datos y entidades), control (lógica analítica, procesamiento de tópicos y lógica de upsert) y la capa de exposición del servicio REST impulsada por Javalin.
