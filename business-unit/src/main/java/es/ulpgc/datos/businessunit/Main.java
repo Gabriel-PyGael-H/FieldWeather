@@ -1,8 +1,9 @@
-package es.ulpgc.datos;
+package es.ulpgc.datos.businessunit;
 
-import es.ulpgc.datos.control.*;
-import es.ulpgc.datos.control.Datamart;
-import es.ulpgc.datos.view.UIService;
+import es.ulpgc.datos.businessunit.control.*;
+import es.ulpgc.datos.businessunit.control.eventprocessors.FootballProcessor;
+import es.ulpgc.datos.businessunit.control.eventprocessors.WeatherProcessor;
+import es.ulpgc.datos.businessunit.view.UIService;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
@@ -16,13 +17,13 @@ public class Main {
         int    port           = Integer.parseInt(args[2]);
 
         brokerUrl = brokerUrl.startsWith("tcp://") ? brokerUrl : "tcp://" + brokerUrl;
-
         Datamart datamart = new Datamart("datamart.db");
 
-        HistoryLoader loader = new HistoryLoader(datamart, eventStorePath);
+        FootballProcessor footballProcessor = new FootballProcessor(datamart);
+        WeatherProcessor weatherProcessor = new WeatherProcessor(datamart);
+        HistoryLoader loader = new HistoryLoader(footballProcessor, weatherProcessor, eventStorePath);
         loader.loadFootballHistory();
-
-        EventConsumer consumer = new EventConsumer(brokerUrl, datamart);
+        EventConsumer consumer = new EventConsumer(brokerUrl, footballProcessor, weatherProcessor);
         consumer.subscribe("Football");
         consumer.subscribe("Weather");
 

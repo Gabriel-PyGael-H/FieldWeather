@@ -1,4 +1,4 @@
-package es.ulpgc.datos.model;
+package es.ulpgc.datos.businessunit.model;
 
 public class Recommendation {
     private final String text;

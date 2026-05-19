@@ -1,6 +1,6 @@
-package es.ulpgc.datos.control;
+package es.ulpgc.datos.businessunit.control;
 
-import es.ulpgc.datos.view.UIService;
+import es.ulpgc.datos.businessunit.view.UIService;
 
 public class Controller {
     private final Datamart datamart;

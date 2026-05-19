@@ -1,4 +1,4 @@
-package es.ulpgc.datos.model;
+package es.ulpgc.datos.businessunit.model;
 
 import es.ulpgc.datos.footballfeeder.model.Match;
 import org.junit.jupiter.api.Test;

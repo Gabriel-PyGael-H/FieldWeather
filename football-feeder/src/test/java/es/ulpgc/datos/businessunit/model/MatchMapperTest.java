@@ -1,4 +1,4 @@
-package es.ulpgc.datos.model;
+package es.ulpgc.datos.businessunit.model;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

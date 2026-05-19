@@ -1,17 +1,21 @@
-package es.ulpgc.datos.control;
+package es.ulpgc.datos.businessunit.control;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import es.ulpgc.datos.businessunit.control.eventprocessors.FootballProcessor;
+import es.ulpgc.datos.businessunit.control.eventprocessors.WeatherProcessor;
 
 import java.io.IOException;
 import java.nio.file.*;
 
 public class HistoryLoader {
-    private final Datamart datamart;
+    private final FootballProcessor footballProcessor;
+    private final WeatherProcessor weatherProcessor;
     private final String eventStorePath;
 
-    public HistoryLoader(Datamart datamart, String eventStorePath) {
-        this.datamart = datamart;
+    public HistoryLoader(FootballProcessor fp, WeatherProcessor wp, String eventStorePath) {
+        this.footballProcessor = fp;
+        this.weatherProcessor = wp;
         this.eventStorePath = eventStorePath;
     }
 
@@ -28,26 +32,11 @@ public class HistoryLoader {
                     Files.lines(file).filter(l -> !l.isBlank()).forEach(line -> {
                         JsonObject event = JsonParser.parseString(line).getAsJsonObject();
                         if (topic.equals("Football")) {
-                            String home = event.get("homeTeam").getAsString();
-                            datamart.insertMatchWeather(
-                                    home,
-                                    event.get("awayTeam").getAsString(),
-                                    event.get("homeScore").getAsInt(),
-                                    event.get("awayScore").getAsInt(),
-                                    event.get("matchDate").getAsString(),
-                                    getCityForTeam(home.trim()),
-                                    null, null, "Historical data",
-                                    event.get("ts").getAsString()
-                            );
-                        } else {
-                            String city = normalize(event.get("city").getAsString());
-                            double temp = event.get("temperature").getAsDouble();
-                            int hum = event.get("humidity").getAsInt();
-                            String desc = event.get("description").getAsString();
-                            String time = event.get("predictionTime").getAsString();
-
-                            datamart.updateWeather(city, temp, hum, desc, time);
+                            footballProcessor.processEvent(event);
+                        } else if (topic.equals("Weather")) {
+                            weatherProcessor.processEvent(event);
                         }
+
                     });
                 } catch (Exception ignored) {}
             });

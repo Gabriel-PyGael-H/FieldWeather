@@ -1,6 +1,6 @@
-package es.ulpgc.datos.view;
+package es.ulpgc.datos.businessunit.view;
 
-import es.ulpgc.datos.control.Datamart;
+import es.ulpgc.datos.businessunit.control.Datamart;
 import io.javalin.Javalin;
 
 public class UIService {
