@@ -11,10 +11,8 @@ public class Main {
             System.out.println("Uso: Main <api-url> <broker-url>");
             return;
         }
-
         String apiUrl = args[0];
         String brokerUrl = args[1];
-
         Controller controller = new Controller(
                 new OpenWeatherMapFeeder(apiUrl),
                 new WeatherEventStore(brokerUrl)

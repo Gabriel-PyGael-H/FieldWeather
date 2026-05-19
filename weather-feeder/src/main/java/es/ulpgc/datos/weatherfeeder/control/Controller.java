@@ -27,9 +27,9 @@ public class Controller {
 
     private void fetch() {
         System.out.println("Obteniendo datos meteorológicos...");
-        List<WeatherEvent> weatherList = feeder.fetchWeather();
-        System.out.println("Ciudades obtenidas: " + weatherList.size());
-        weatherList.forEach(System.out::println);
-        store.store(weatherList);
+        List<WeatherEvent> weatherEvents = feeder.fetchWeather();
+        System.out.println("Ciudades obtenidas: " + weatherEvents.size());
+        weatherEvents.forEach(System.out::println);
+        store.store(weatherEvents);
     }
 }

@@ -33,12 +33,12 @@ public class OpenWeatherMapFeeder implements WeatherFeeder {
                 String json = fetchJson(city);
                 JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
 
-                List<WeatherEvent> weatherList = mapper.map(jsonObject);
-                for (WeatherEvent weather : weatherList) {
+                List<WeatherEvent> weatherEvents = mapper.map(jsonObject);
+                for (WeatherEvent weather : weatherEvents) {
                     weather.setCity(city);
                 }
 
-                results.addAll(weatherList);
+                results.addAll(weatherEvents);
 
             } catch (IOException | InterruptedException e) {
                 System.err.println("Error al obtener datos de " + city + ": " + e.getMessage());

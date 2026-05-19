@@ -36,7 +36,7 @@ public class DatabaseWeatherStore implements WeatherStore {
     }
 
     @Override
-    public void store(List<WeatherEvent> weatherList) {
+    public void store(List<WeatherEvent> weatherEvents) {
         String sql = """
             INSERT OR REPLACE INTO weather
                 (city, country, temperature, feels_like, humidity, description, prediction_time, captured_at)
@@ -48,7 +48,7 @@ public class DatabaseWeatherStore implements WeatherStore {
 
             conn.setAutoCommit(false);
 
-            for (WeatherEvent weather : weatherList) {
+            for (WeatherEvent weather : weatherEvents) {
                 pstmt.setString(1, weather.getCity());
                 pstmt.setString(2, weather.getCountry());
                 pstmt.setDouble(3, weather.getTemperature());
@@ -62,7 +62,7 @@ public class DatabaseWeatherStore implements WeatherStore {
             }
             pstmt.executeBatch();
             conn.commit();
-            System.out.println("Sincronizados " + weatherList.size() + " registros climáticos en el Store local.");
+            System.out.println("Sincronizados " + weatherEvents.size() + " registros climáticos en el Store local.");
 
         } catch (SQLException e) {
             System.err.println("Error al guardar en la base de datos: " + e.getMessage());

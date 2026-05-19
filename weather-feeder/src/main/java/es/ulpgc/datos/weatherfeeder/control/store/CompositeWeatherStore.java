@@ -14,8 +14,8 @@ public class CompositeWeatherStore implements WeatherStore {
     }
 
     @Override
-    public void store(List<WeatherEvent> weatherList) { // <--- CAMBIO: Ahora recibe WeatherEvent
-        dbStore.store(weatherList);
-        eventStore.store(weatherList);
+    public void store(List<WeatherEvent> weatherEvents) {
+        dbStore.store(weatherEvents);
+        eventStore.store(weatherEvents);
     }
 }

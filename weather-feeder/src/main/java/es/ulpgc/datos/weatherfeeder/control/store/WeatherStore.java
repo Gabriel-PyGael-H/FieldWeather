@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface WeatherStore {
 
-    void store(List<WeatherEvent> weatherList);
+    void store(List<WeatherEvent> weatherEvents);
 
 }
