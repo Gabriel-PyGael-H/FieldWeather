@@ -1,7 +1,9 @@
-package es.ulpgc.datos.model;
+package es.ulpgc.datos.control;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import es.ulpgc.datos.model.Recommendation;
+
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

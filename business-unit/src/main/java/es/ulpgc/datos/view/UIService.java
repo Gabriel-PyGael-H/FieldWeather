@@ -1,12 +1,12 @@
 package es.ulpgc.datos.view;
 
-import es.ulpgc.datos.model.Datamart;
+import es.ulpgc.datos.control.Datamart;
 import io.javalin.Javalin;
 
-public class RestApi {
+public class UIService {
     private final Datamart datamart;
 
-    public RestApi(Datamart datamart) {
+    public UIService(Datamart datamart) {
         this.datamart = datamart;
     }
 

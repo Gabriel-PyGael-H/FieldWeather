@@ -2,7 +2,6 @@ package es.ulpgc.datos.control;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import es.ulpgc.datos.model.Datamart;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;

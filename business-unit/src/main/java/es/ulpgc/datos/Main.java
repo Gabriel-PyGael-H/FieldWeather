@@ -1,8 +1,8 @@
 package es.ulpgc.datos;
 
 import es.ulpgc.datos.control.*;
-import es.ulpgc.datos.model.Datamart;
-import es.ulpgc.datos.view.RestApi;
+import es.ulpgc.datos.control.Datamart;
+import es.ulpgc.datos.view.UIService;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
@@ -26,7 +26,7 @@ public class Main {
         consumer.subscribe("Football");
         consumer.subscribe("Weather");
 
-        new RestApi(datamart).start(port);
+        new UIService(datamart).start(port);
 
         Object lock = new Object();
         synchronized (lock) { lock.wait(); }
