@@ -145,7 +145,22 @@ EventStoreListener es el componente que se conecta al broker ActiveMQ y se suscr
 
 EventStore es el componente encargado de persistir los eventos en el sistema de ficheros siguiendo la estructura eventstore/{topic}/{ss}/{YYYYMMDD}.events, añadiendo cada evento en formato JSON Lines al fichero correspondiente según la fecha del timestamp del evento.
 
+#### Diagrama de clases — Business unit
+<img width="1906" height="771" alt="image" src="https://github.com/user-attachments/assets/ccc4e886-d3a6-4d12-8b8d-3d84b700d06e" />
 
+El módulo business-unit es el componente central del sistema, responsable de combinar los datos meteorológicos y los resultados de fútbol para generar recomendaciones útiles al usuario.
+
+La clase Main actúa como punto de entrada. Inicializa el Datamart, crea los procesadores FootballProcessor y WeatherProcessor, arranca el HistoryLoader para cargar el historial del event store, suscribe el EventConsumer a los topics Football y Weather, y finalmente lanza el UIService con la API REST.
+
+EventConsumer se conecta a ActiveMQ y escucha los eventos en tiempo real, delegando cada evento recibido al procesador correspondiente según el topic: FootballProcessor para eventos de fútbol y WeatherProcessor para eventos meteorológicos.
+
+HistoryLoader carga el historial previo del event store al arrancar el sistema, procesando los ficheros .events y delegando igualmente en FootballProcessor y WeatherProcessor para poblar el Datamart con datos históricos.
+
+FootballProcessor y WeatherProcessor son los procesadores de eventos. Ambos reciben eventos JSON y los insertan o actualizan en el Datamart. WeatherProcessor además calcula una interpolación de temperatura y genera una Recommendation con consejos para el aficionado según las condiciones meteorológicas previstas para el partido.
+
+Datamart es la base de datos central del módulo, implementada sobre SQLite, que almacena la combinación de partidos y datos meteorológicos. Expone métodos para insertar, actualizar y consultar esta información.
+
+UIService expone una API REST mediante Javalin que permite consultar recomendaciones por equipo, listar todos los partidos y filtrar por ciudad, sirviendo también el frontend estático desde /public.
 
 ### 6. Principios y patrones de diseño aplicados
 Para que el código sea limpio y fácil de mantener, hemos seguido varias reglas de diseño:
