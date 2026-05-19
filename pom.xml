@@ -10,12 +10,15 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>football-module</module>
+        <module>football-feeder</module>
+        <module>event-store-builder</module>
+        <module>weather-feeder</module>
+        <module>business-unit</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
