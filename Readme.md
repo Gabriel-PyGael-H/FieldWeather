@@ -134,6 +134,18 @@ FootballDataFeeder es la implementación concreta de FootballFeeder. Se encarga 
 
 En cuanto a la persistencia, CompositeMatchStore implementa MatchStore y actúa como un almacén compuesto que delega en dos implementaciones simultáneamente: DatabaseMatchStore, que guarda los partidos en una base de datos SQLite, y MatchEventStore, que los publica en un topic de ActiveMQ para que otros módulos puedan consumirlos.
 
+#### Diagrama de clases — Event Store builder
+<img width="770" height="467" alt="image" src="https://github.com/user-attachments/assets/f23d7627-9eb1-431e-8924-9a281b230cd6" />
+
+El módulo event-store-builder es el componente suscriptor del sistema, responsable de consumir los eventos publicados en ActiveMQ y persistirlos de forma organizada en el sistema de ficheros.
+
+La clase Main actúa como punto de entrada. Crea una instancia de EventStore y se la inyecta al EventStoreListener, suscribiéndolo a los topics Weather y Football. Una vez iniciado, el programa permanece en ejecución a la espera de nuevos eventos.
+
+EventStoreListener es el componente que se conecta al broker ActiveMQ y se suscribe de forma duradera a los topics indicados. Por cada mensaje recibido, extrae los campos ts y ss del evento JSON y delega el almacenamiento en EventStore.
+
+EventStore es el componente encargado de persistir los eventos en el sistema de ficheros siguiendo la estructura eventstore/{topic}/{ss}/{YYYYMMDD}.events, añadiendo cada evento en formato JSON Lines al fichero correspondiente según la fecha del timestamp del evento.
+
+
 
 ### 6. Principios y patrones de diseño aplicados
 Para que el código sea limpio y fácil de mantener, hemos seguido varias reglas de diseño:
