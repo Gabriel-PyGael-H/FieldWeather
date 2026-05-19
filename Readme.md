@@ -88,6 +88,12 @@ Paso 2: Ejecute los módulos de persistencia y procesamiento (Event Store Builde
 
 Paso 3: Ejecute los flujos emisores (Football Feeder y Weather Feeder) para comenzar con la ingesta dinámica de datos y comprobar el procesamiento en tiempo real durante la presentación.
 
+Una vez que business-unit esté en ejecución, levanta una API REST en el puerto 7000. Puedes acceder a los datos mediante las siguientes rutas:
+
+Interfaz Gráfica: http://localhost:7000/ (Muestra el menú interactivo con los partidos futuros y predicciones).
+
+Endpoint de Partidos (JSON): Petición GET a http://localhost:7000/matches para obtener la lista completa de encuentros cruzados con su respectivo clima y recomendación.
+
 
 Cuando ejecute el business-unit y abra el (http://localhost:7000)
 Se encontrará con el siguiente menú.
