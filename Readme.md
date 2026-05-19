@@ -55,7 +55,7 @@ Simplemente abre el archivo Main de cada módulo y dale al botón verde de Run /
 
 
 
-### 3. Instrucciones claras para compilar y ejecutar cada módulo
+### 4. Ejemplos de uso
 
 Requisitos del Entorno
 Java Development Kit (JDK): Versión 17 o superior correctamente configurada en el IDE.
@@ -81,7 +81,6 @@ Weather Feeder: * Program arguments: tcp://localhost:61616 https://api.openweath
 
 (Conecta al broker local e ingesta las predicciones meteorológicas enviando los datos en tiempo real).
 
-Protocolo para la Demo Local (Secuencia de Arranque):
 
 Paso 1: Inicie el servidor local de Apache ActiveMQ y asegúrese de que esté escuchando en tcp://localhost:61616.
 
@@ -90,41 +89,16 @@ Paso 2: Ejecute los módulos de persistencia y procesamiento (Event Store Builde
 Paso 3: Ejecute los flujos emisores (Football Feeder y Weather Feeder) para comenzar con la ingesta dinámica de datos y comprobar el procesamiento en tiempo real durante la presentación.
 
 
-### 4. Ejemplos de uso 
-Una vez que el módulo Business Unit se encuentra en ejecución, inicializa un servicio web ligero en el puerto 7000 impulsado por el framework Javalin. Este servicio expone los datos procesados del Datamart en formato estructurado JSON
+Cuando ejecute el business-unit y abra el (http://localhost:7000)
+Se encontrará con el siguiente menú.
+<img width="1900" height="902" alt="Captura de pantalla 2026-05-19 223251" src="https://github.com/user-attachments/assets/48feae15-ee04-4b28-b61c-08a3a7877bb5" />
+En el verá todos los partidos jugados, los partidos futuros que incluyen la predicción del tiempo y todos los partidos.
 
-Pedir la recomendación para un equipo: * GET http://localhost:7000/recommend/Real Madrid CF
+Aquí una demostración al abrir la página de los próximos partidos.
+<img width="1897" height="913" alt="Captura de pantalla 2026-05-19 223303" src="https://github.com/user-attachments/assets/4c1afb7a-8e6a-415b-b69b-4041b0e27c94" />
 
-Te devolverá un JSON como este:
 
-JSON
-{
-  "match": "Real Madrid CF vs FC Barcelona",
-  "date": "2026-10-24 20:00:00",
-  "recommendation": " 🌤️ TIEMPO PERFECTO: Manga corta o sudadera fina. Disfruta del fútbol.",
-  "weather": "20.5°C, clear sky"
-}
-Ver todos los partidos guardados:
 
-GET http://localhost:7000/matches
-
-Ver los partidos de una ciudad concreta:
-
-GET http://localhost:7000/weather/Madrid
-
-Una vez que la Business Unit está en marcha, expone un servicio web en el puerto 7000 (usando el framework Javalin) que devuelve las respuestas en formato limpio JSON.
-Una vez que el módulo Business Unit se encuentra en ejecución, inicializa un servicio web ligero en el puerto 7000 impulsado por el framework Javalin. Este servicio expone los datos procesados del Datamart en formato estructurado JSON. Las consultas se pueden realizar directamente desde cualquier navegador web, herramientas como Postman, o mediante comandos curl.1. Inferencia Predictiva sobre Partidos FuturosEndpoint: GET /recommend/{nombre_del_equipo}Lógica interna: El sistema filtra los eventos planificados basándose en la marca temporal actual ($match\_date \ge DATETIME('now')$) y recupera la recomendación climática calculada para el encuentro más próximo cronológicamente del equipo solicitado.Ejemplo de Petición: http://localhost:7000/recommend/Real%20Madrid%20CFRespuesta del sistema (JSON):JSON{
-  "match": "Real Madrid CF vs Club Atlético de Madrid",
-  "date": "2026-05-24 21:00:00",
-  "recommendation": " 🌤️ TIEMPO PERFECTO: Sudadera fina o manga corta. Ideal para disfrutar del partido.",
-  "weather": "20.5°C, clear sky"
-}
-2. Consulta de Estado Meteorológico por UbicaciónEndpoint: GET /weather/{ciudad}Lógica interna:
-Recupera las últimas métricas atmosféricas e interpolaciones predictivas registradas en el Datamart asociadas a una localización geográfica específica.
-Ejemplo de Petición: http://localhost:7000/weather/Madrid
-3. Catálogo Global: GET /matches
-Lógica interna: Devuelve el conjunto completo de registros integrados en el Datamart ordenados cronológicamente. 
-Ejemplo de Petición: http://localhost:7000/matches
 ### 5. Arquitectura de Sistema
 
 <img width="545" height="968" alt="image" src="https://github.com/user-attachments/assets/259d4f50-1cde-4e9a-a31c-7acecda685d9" />
