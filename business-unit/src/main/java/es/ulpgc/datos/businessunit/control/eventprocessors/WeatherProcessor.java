@@ -68,14 +68,14 @@ public class WeatherProcessor {
         }
         if (temp <= 0)  return new Recommendation("HELADA: Abrigo de montaña.", "CRITICAL");
         if (temp <= 10) return new Recommendation("FRÍO INTENSO: Ropa de invierno.", "COLD");
-        if (temp <= 16) return new Recommendation("FRESCO: Chaqueta.", "CHILLY");
+        if (temp <= 16) return new Recommendation("FRÍO: Chaqueta.", "CHILLY");
         if (temp <= 22) {
-            return isCloudy ? new Recommendation("DÍA GRIS: Rebeca fina.", "INFO")
-                    : new Recommendation("TIEMPO PERFECTO: Manga corta.", "PERFECT");
+            return isCloudy ? new Recommendation("DÍA FRESCO: Rebeca fina.", "INFO")
+                    : new Recommendation("TIEMPO PARA LLEVAR ABRIGO POR SI ACASO: Manga corta.", "PERFECT");
         }
         if (temp <= 28) {
             return (d.contains("clear") || d.contains("sun")) ? new Recommendation("SOLEADO: Gafas de sol.", "SUNNY")
-                    : new Recommendation("BOCHORNO: Ropa ligera.", "WARM");
+                    : new Recommendation("AGRADABLE: Ropa ligera.", "WARM");
         }
         if (temp <= 35) return new Recommendation("CALOR INTENSO: Hidrátate.", "HOT");
         return new Recommendation("ALERTA CALOR: Evita el sol.", "CRITICAL");
