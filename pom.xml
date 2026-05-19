@@ -11,7 +11,6 @@
 
     <modules>
         <module>football-module</module>
-        <module>weather-module</module>
     </modules>
 
     <properties>
