@@ -109,8 +109,10 @@ Aquí una demostración al abrir la página de los próximos partidos.
 
 <img width="545" height="968" alt="image" src="https://github.com/user-attachments/assets/259d4f50-1cde-4e9a-a31c-7acecda685d9" />
 
+
 #### Diagrama de clases — Weather Feeder
 <img width="1902" height="748" alt="image" src="https://github.com/user-attachments/assets/f818b89e-a5d7-4468-87f7-3b464e626885" />
+
 El módulo weather-feeder sigue una arquitectura en capas basada en interfaces para desacoplar las responsabilidades de cada componente.
 
 La clase Main actúa como punto de entrada y delega toda la lógica al Controller, que orquesta el flujo principal: obtiene los datos meteorológicos a través de la interfaz WeatherFeeder y los persiste a través de la interfaz WeatherStore.
@@ -118,6 +120,20 @@ La clase Main actúa como punto de entrada y delega toda la lógica al Controlle
 OpenWeatherMapFeeder es la implementación concreta de WeatherFeeder. Se encarga de consultar la API de OpenWeatherMap, parsear la respuesta JSON usando WeatherMapper y devolver una lista de objetos WeatherEvent, que representan el modelo de datos interno del módulo con campos como temperatura, humedad, descripción y timestamps.
 
 En cuanto a la persistencia, CompositeWeatherStore implementa WeatherStore y actúa como un almacén compuesto que delega en dos implementaciones simultáneamente: DatabaseWeatherStore, que guarda los eventos en una base de datos SQLite, y WeatherEventStore, que los publica en un topic de ActiveMQ para que otros módulos puedan consumirlos.
+
+
+#### Diagrama de clases — Football Feeder
+
+<img width="1918" height="687" alt="image" src="https://github.com/user-attachments/assets/ebac65fa-f67e-461b-8717-13863a8da68c" />
+
+El módulo football-feeder sigue la misma arquitectura en capas basada en interfaces que el módulo de weather, manteniendo el mismo patrón de diseño para garantizar la coherencia del sistema.
+
+La clase Main actúa como punto de entrada y delega toda la lógica al Controller, que orquesta el flujo principal: obtiene los datos de partidos a través de la interfaz FootballFeeder y los persiste a través de la interfaz MatchStore.
+
+FootballDataFeeder es la implementación concreta de FootballFeeder. Se encarga de consultar la API de Football-Data.org, parsear la respuesta JSON usando MatchMapper y devolver una lista de objetos Match, que representan el modelo de datos interno del módulo con campos como equipos, marcador, estado del partido, competición, fecha y ciudad.
+
+En cuanto a la persistencia, CompositeMatchStore implementa MatchStore y actúa como un almacén compuesto que delega en dos implementaciones simultáneamente: DatabaseMatchStore, que guarda los partidos en una base de datos SQLite, y MatchEventStore, que los publica en un topic de ActiveMQ para que otros módulos puedan consumirlos.
+
 
 ### 6. Principios y patrones de diseño aplicados
 Para que el código sea limpio y fácil de mantener, hemos seguido varias reglas de diseño:
