@@ -5,6 +5,7 @@ import es.ulpgc.datos.businessunit.control.Datamart;
 import es.ulpgc.datos.businessunit.control.HistoryLoader;
 
 public class FootballProcessor {
+    private static final String DEFAULT_DESCRIPTION = "Live match data";
     private final Datamart datamart;
 
     public FootballProcessor(Datamart datamart) {
@@ -13,16 +14,19 @@ public class FootballProcessor {
 
     public void processEvent(JsonObject event) {
         try {
-            String home = event.get("homeTeam").getAsString();
+            String homeTeam = event.get("homeTeam").getAsString();
+            String awayTeam = event.get("awayTeam").getAsString();
+            int homeScore = event.get("homeScore").getAsInt();
+            int awayScore = event.get("awayScore").getAsInt();
+            String matchDate = event.get("matchDate").getAsString();
+            String timestamp = event.get("ts").getAsString();
+
+            String city = HistoryLoader.getCityForTeam(homeTeam.trim());
+
             datamart.insertMatchWeather(
-                    home,
-                    event.get("awayTeam").getAsString(),
-                    event.get("homeScore").getAsInt(),
-                    event.get("awayScore").getAsInt(),
-                    event.get("matchDate").getAsString(),
-                    HistoryLoader.getCityForTeam(home.trim()),
-                    null, null, "Live match data",
-                    event.get("ts").getAsString()
+                    homeTeam, awayTeam, homeScore, awayScore,
+                    matchDate, city, null, null,
+                    DEFAULT_DESCRIPTION, timestamp
             );
         } catch (Exception e) {
             System.err.println("Error en FootballProcessor: " + e.getMessage());

@@ -1,47 +1,52 @@
 package es.ulpgc.datos.weatherfeeder.control.store;
 
 import com.google.gson.Gson;
-import es.ulpgc.datos.weatherfeeder.model.WeatherEvent; // La única que queda
+import es.ulpgc.datos.weatherfeeder.model.WeatherEvent;
 import org.apache.activemq.ActiveMQConnectionFactory;
-
 import javax.jms.*;
 import java.util.List;
 
 public class WeatherEventStore implements WeatherStore {
-
     private static final String TOPIC_NAME = "Weather";
-    private final String brokerUrl;
+
     private final Gson gson = new Gson();
+    private Connection connection;
+    private Session session;
+    private MessageProducer producer;
 
     public WeatherEventStore(String brokerUrl) {
-        this.brokerUrl = brokerUrl;
+        setupActiveMQ(brokerUrl);
+    }
+
+    private void setupActiveMQ(String brokerUrl) {
+        try {
+            ConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
+            this.connection = factory.createConnection();
+            this.connection.start();
+            this.session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createTopic(TOPIC_NAME);
+            this.producer = session.createProducer(destination);
+        } catch (JMSException e) {
+            System.err.println("Error al inicializar la conexión con ActiveMQ: " + e.getMessage());
+        }
     }
 
     @Override
     public void store(List<WeatherEvent> weatherEvents) {
+        if (producer == null || session == null) return;
+
         try {
-            ConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
-            Connection connection = factory.createConnection();
-            connection.start();
-
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Destination destination = session.createTopic(TOPIC_NAME);
-            MessageProducer producer = session.createProducer(destination);
-
             for (WeatherEvent event : weatherEvents) {
-                String json = gson.toJson(event);
-                TextMessage message = session.createTextMessage(json);
-                producer.send(message);
+                sendEvent(event);
             }
-
-            System.out.println("Publicados " + weatherEvents.size() + " eventos de clima en el topic " + TOPIC_NAME);
-
-            producer.close();
-            session.close();
-            connection.close();
-
         } catch (JMSException e) {
-            System.err.println("Error al publicar en ActiveMQ: " + e.getMessage());
+            System.err.println("Error al publicar lote en ActiveMQ: " + e.getMessage());
         }
+    }
+
+    private void sendEvent(WeatherEvent event) throws JMSException {
+        String json = gson.toJson(event);
+        TextMessage message = session.createTextMessage(json);
+        producer.send(message);
     }
 }

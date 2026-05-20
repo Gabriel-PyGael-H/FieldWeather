@@ -39,21 +39,24 @@ public class EventConsumer {
             MessageConsumer consumer = session.createConsumer(topic);
             consumer.setMessageListener(message -> {
                 if (message instanceof TextMessage textMessage) {
-                    try {
-                        JsonObject event = JsonParser.parseString(textMessage.getText()).getAsJsonObject();
-                        if (topicName.equals("Football")) {
-                            footballProcessor.processEvent(event);
-                        } else if (topicName.equals("Weather")) {
-                            weatherProcessor.processEvent(event);
-                        }
-
-                    } catch (JMSException e) {
-                        System.err.println("Error procesando mensaje de ActiveMQ: " + e.getMessage());
-                    }
+                    processIncomingMessage(textMessage, topicName);
                 }
             });
         } catch (JMSException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void processIncomingMessage(TextMessage textMessage, String topicName) {
+        try {
+            JsonObject event = JsonParser.parseString(textMessage.getText()).getAsJsonObject();
+            if (topicName.equals("Football")) {
+                footballProcessor.processEvent(event);
+            } else if (topicName.equals("Weather")) {
+                weatherProcessor.processEvent(event);
+            }
+        } catch (Exception e) {
+            System.err.println("Error procesando mensaje de ActiveMQ: " + e.getMessage());
         }
     }
 }

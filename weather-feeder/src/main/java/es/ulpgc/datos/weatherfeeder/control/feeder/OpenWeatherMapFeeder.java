@@ -20,36 +20,35 @@ public class OpenWeatherMapFeeder implements WeatherFeeder {
 
     private final WeatherMapper mapper = new WeatherMapper();
     private final String apiUrl;
+    private final HttpClient client;
 
     public OpenWeatherMapFeeder(String apiUrl) {
         this.apiUrl = apiUrl;
+        this.client = HttpClient.newHttpClient();
     }
 
     @Override
     public List<WeatherEvent> fetchWeather() {
         List<WeatherEvent> results = new ArrayList<>();
         for (String city : CITIES) {
-            try {
-                String json = fetchJson(city);
-                JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
-
-                List<WeatherEvent> weatherEvents = mapper.map(jsonObject);
-                for (WeatherEvent weather : weatherEvents) {
-                    weather.setCity(city);
-                }
-
-                results.addAll(weatherEvents);
-
-            } catch (IOException | InterruptedException e) {
-                System.err.println("Error al obtener datos de " + city + ": " + e.getMessage());
-            }
+            results.addAll(fetchCityWeather(city));
         }
         return results;
     }
 
+    private List<WeatherEvent> fetchCityWeather(String city) {
+        try {
+            String json = fetchJson(city);
+            JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
+            return mapper.map(jsonObject, city);
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error al obtener datos de " + city + ": " + e.getMessage());
+            return List.of();
+        }
+    }
+
     private String fetchJson(String city) throws IOException, InterruptedException {
         String url = String.format(apiUrl, city.replace(" ", "%20"));
-        HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()

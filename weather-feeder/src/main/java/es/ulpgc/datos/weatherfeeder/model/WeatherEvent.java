@@ -3,8 +3,7 @@ package es.ulpgc.datos.weatherfeeder.model;
 public class WeatherEvent {
     private final String ts;
     private final String ss;
-
-    private String city;
+    private final String city;
     private final String country;
     private final double temperature;
     private final double feelsLike;
@@ -25,8 +24,6 @@ public class WeatherEvent {
         this.description = description;
         this.predictionTime = predictionTime;
     }
-
-    public void setCity(String city) { this.city = city; }
 
     public String getTs() { return ts; }
     public String getSs() { return ss; }

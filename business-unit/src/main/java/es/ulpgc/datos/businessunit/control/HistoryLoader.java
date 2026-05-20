@@ -27,20 +27,28 @@ public class HistoryLoader {
     private void loadFromPath(Path basePath, String topic) {
         if (!Files.exists(basePath)) return;
         try (var stream = Files.walk(basePath)) {
-            stream.filter(p -> p.toString().endsWith(".events")).forEach(file -> {
-                try {
-                    Files.lines(file).filter(l -> !l.isBlank()).forEach(line -> {
-                        JsonObject event = JsonParser.parseString(line).getAsJsonObject();
-                        if (topic.equals("Football")) {
-                            footballProcessor.processEvent(event);
-                        } else if (topic.equals("Weather")) {
-                            weatherProcessor.processEvent(event);
-                        }
+            stream.filter(p -> p.toString().endsWith(".events"))
+                    .forEach(file -> parseEventFile(file, topic));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-                    });
-                } catch (Exception ignored) {}
-            });
-        } catch (IOException e) { e.printStackTrace(); }
+    private void parseEventFile(Path file, String topic) {
+        try {
+            Files.lines(file)
+                    .filter(line -> !line.isBlank())
+                    .forEach(line -> processEventLine(line, topic));
+        } catch (Exception ignored) {}
+    }
+
+    private void processEventLine(String line, String topic) {
+        JsonObject event = JsonParser.parseString(line).getAsJsonObject();
+        if (topic.equals("Football")) {
+            footballProcessor.processEvent(event);
+        } else if (topic.equals("Weather")) {
+            weatherProcessor.processEvent(event);
+        }
     }
 
     public static String normalize(String city) {

@@ -20,19 +20,22 @@ public class EventStoreListener {
     public void subscribe(String topicName) {
         new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
+                Connection connection = null;
+                Session session = null;
+                MessageConsumer consumer = null;
+
                 try {
                     ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
-                    Connection connection = factory.createConnection();
+                    connection = factory.createConnection();
                     connection.setClientID(CLIENT_ID + "_" + topicName);
                     connection.start();
 
-                    Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                    session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
                     Topic topic = session.createTopic(topicName);
-                    MessageConsumer consumer = session.createDurableSubscriber(topic, "sub-" + topicName);
+                    consumer = session.createDurableSubscriber(topic, "sub-" + topicName);
 
                     System.out.println("Suscrito a: " + topicName);
-
-                    while (true) {
+                    while (!Thread.currentThread().isInterrupted()) {
                         Message message = consumer.receive();
                         if (message instanceof TextMessage textMessage) {
                             String json = textMessage.getText();
@@ -45,7 +48,15 @@ public class EventStoreListener {
                     }
                 } catch (JMSException e) {
                     System.err.println("Reconectando " + topicName + "... " + e.getMessage());
-                    try { Thread.sleep(5000); } catch (InterruptedException ie) { break; }
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ie) {
+                        break;
+                    }
+                } finally {
+                    try { if (consumer != null) consumer.close(); } catch (JMSException ignored) {}
+                    try { if (session != null) session.close(); } catch (JMSException ignored) {}
+                    try { if (connection != null) connection.close(); } catch (JMSException ignored) {}
                 }
             }
         }).start();

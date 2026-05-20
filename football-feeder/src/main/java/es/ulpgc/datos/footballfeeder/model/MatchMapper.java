@@ -1,9 +1,10 @@
 package es.ulpgc.datos.footballfeeder.model;
 
 import com.google.gson.JsonObject;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class MatchMapper {
@@ -22,14 +23,20 @@ public class MatchMapper {
         String status = m.get("status").getAsString();
         String competition = m.getAsJsonObject("competition").get("name").getAsString();
 
-
         ZonedDateTime utcTime = ZonedDateTime.parse(m.get("utcDate").getAsString(), FORMATTER);
         LocalDateTime matchDate = utcTime.withZoneSameInstant(SPAIN_ZONE).toLocalDateTime();
 
-        String city = switch (homeTeam) {
+        String city = getCityByTeam(homeTeam);
+        String ts = Instant.now().toString();
+
+        return new Match(homeTeam, awayTeam, homeScore, awayScore, status, competition, matchDate, ts, city);
+    }
+
+    private String getCityByTeam(String teamName) {
+        return switch (teamName) {
             case "Real Madrid CF", "Club Atlético de Madrid", "Getafe CF", "Rayo Vallecano de Madrid" -> "Madrid";
             case "FC Barcelona", "RCD Espanyol de Barcelona" -> "Barcelona";
-            case "Sevilla FC", "Real Betis Balompié" -> "Sevilla";
+            case "Sevilla FC", "Real Betis Balompié", "Real Betis" -> "Sevilla";
             case "Valencia CF", "Levante UD" -> "Valencia";
             case "Athletic Club" -> "Bilbao";
             case "Girona FC" -> "Girona";
@@ -43,8 +50,5 @@ public class MatchMapper {
             case "Real Oviedo" -> "Oviedo";
             default -> "Unknown";
         };
-
-        String ts = java.time.Instant.now().toString();
-        return new Match(homeTeam, awayTeam, homeScore, awayScore, status, competition, matchDate, city, ts);
     }
 }

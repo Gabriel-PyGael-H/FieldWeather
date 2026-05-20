@@ -1,16 +1,15 @@
 package es.ulpgc.datos.store;
 
-
 import java.nio.file.*;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 public class EventStore {
 
     private final String baseDir;
-    private static final DateTimeFormatter OUTPUT = DateTimeFormatter.ofPattern("yyyyMMdd")
+    private static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd")
             .withZone(ZoneOffset.UTC);
-    private static final DateTimeFormatter INPUT = DateTimeFormatter.ISO_INSTANT;
 
     public EventStore() {
         this.baseDir = "eventstore";
@@ -22,9 +21,8 @@ public class EventStore {
 
     public void store(String topic, String ss, String ts, String json) {
         try {
-            java.time.OffsetDateTime dateTime = java.time.OffsetDateTime.parse(ts);
-
-            String date = OUTPUT.format(dateTime);
+            Instant instant = Instant.parse(ts);
+            String date = FILE_NAME_FORMATTER.format(instant);
 
             Path dir = Paths.get(baseDir, topic, ss);
             Files.createDirectories(dir);

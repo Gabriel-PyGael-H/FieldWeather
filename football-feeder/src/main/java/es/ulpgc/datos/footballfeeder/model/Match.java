@@ -4,19 +4,18 @@ import java.time.LocalDateTime;
 
 public class Match {
 
-    private String homeTeam;
-    private String awayTeam;
-    private int homeScore;
-    private int awayScore;
-    private String status;
-    private String competition;
-    private LocalDateTime matchDate;
-    private String capturedAt;
-    private String city;
-
+    private final String homeTeam;
+    private final String awayTeam;
+    private final int homeScore;
+    private final int awayScore;
+    private final String status;
+    private final String competition;
+    private final LocalDateTime matchDate;
+    private final String capturedAt;
+    private final String city;
 
     public Match(String homeTeam, String awayTeam, int homeScore, int awayScore,
-                 String status, String competition, LocalDateTime matchDate, String city, String capturedAt) {
+                 String status, String competition, LocalDateTime matchDate, String capturedAt, String city) {
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
         this.homeScore = homeScore;
@@ -24,19 +23,45 @@ public class Match {
         this.status = status;
         this.competition = competition;
         this.matchDate = matchDate;
-        this.city = city;
         this.capturedAt = capturedAt;
+        this.city = city;
     }
 
-    public String getHomeTeam()        { return homeTeam; }
-    public String getAwayTeam()        { return awayTeam; }
-    public int getHomeScore()          { return homeScore; }
-    public int getAwayScore()          { return awayScore; }
-    public String getStatus()          { return status; }
-    public String getCompetition()     { return competition; }
-    public LocalDateTime getMatchDate()   { return matchDate; }
-    public String getCapturedAt()  { return capturedAt; }
-    public String getCity() { return city; }
+    public String getHomeTeam() {
+        return homeTeam;
+    }
+
+    public String getAwayTeam() {
+        return awayTeam;
+    }
+
+    public int getHomeScore() {
+        return homeScore;
+    }
+
+    public int getAwayScore() {
+        return awayScore;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getCompetition() {
+        return competition;
+    }
+
+    public LocalDateTime getMatchDate() {
+        return matchDate;
+    }
+
+    public String getCapturedAt() {
+        return capturedAt;
+    }
+
+    public String getCity() {
+        return city;
+    }
 
     @Override
     public String toString() {
