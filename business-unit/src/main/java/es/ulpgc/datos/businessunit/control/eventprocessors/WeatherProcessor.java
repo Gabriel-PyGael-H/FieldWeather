@@ -20,8 +20,6 @@ public class WeatherProcessor {
             int hum = event.get("humidity").getAsInt();
             String desc = event.get("description").getAsString();
             String newTime = event.get("predictionTime").getAsString();
-
-            // Extrae los primeros 10 caracteres (yyyy-MM-dd) de forma segura
             String dayFilter = newTime.substring(0, 10) + "%";
 
             JsonObject currentData = datamart.getMatchDataForInterpolation(city, dayFilter);
