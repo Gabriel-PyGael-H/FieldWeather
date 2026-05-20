@@ -16,11 +16,17 @@ public class Main {
         String apiKey = args[1];
         String brokerUrl = args[2];
 
+        MatchEventStore store = new MatchEventStore(brokerUrl);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Apagando aplicación: Cerrando conexión al broker...");
+            store.close();
+        }));
         Controller controller = new Controller(
                 new FootballDataFeeder(apiUrl, apiKey),
-                new MatchEventStore(brokerUrl)
-
+                store
         );
+
         controller.start();
+        System.out.println("Aplicación iniciada correctamente.");
     }
 }
