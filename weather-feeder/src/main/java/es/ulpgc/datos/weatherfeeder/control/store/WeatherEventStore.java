@@ -9,38 +9,50 @@ import java.util.List;
 public class WeatherEventStore implements WeatherStore {
     private static final String TOPIC_NAME = "Weather";
 
-    private final Gson gson = new Gson();
+    private final Gson gson;
     private Connection connection;
     private Session session;
     private MessageProducer producer;
 
     public WeatherEventStore(String brokerUrl) {
-        setupActiveMQ(brokerUrl);
+        this.gson = new Gson();
+        initActiveMQ(brokerUrl);
     }
 
-    private void setupActiveMQ(String brokerUrl) {
+    private void initActiveMQ(String brokerUrl) {
         try {
-            ConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
-            this.connection = factory.createConnection();
-            this.connection.start();
-            this.session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Destination destination = session.createTopic(TOPIC_NAME);
-            this.producer = session.createProducer(destination);
+            setupResources(brokerUrl);
         } catch (JMSException e) {
-            System.err.println("Error al inicializar la conexión con ActiveMQ: " + e.getMessage());
+            System.err.println("Error initializing connection with ActiveMQ: " + e.getMessage());
         }
+    }
+    private void setupResources(String brokerUrl) throws JMSException {
+        ConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
+        this.connection = factory.createConnection();
+        this.connection.start();
+        this.session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Destination destination = session.createTopic(TOPIC_NAME);
+        this.producer = session.createProducer(destination);
     }
 
     @Override
     public void store(List<WeatherEvent> weatherEvents) {
-        if (producer == null || session == null) return;
+        if (isNotReady()) return;
 
         try {
-            for (WeatherEvent event : weatherEvents) {
-                sendEvent(event);
-            }
+            publishEvents(weatherEvents);
         } catch (JMSException e) {
-            System.err.println("Error al publicar lote en ActiveMQ: " + e.getMessage());
+            System.err.println("Error publishing batch to ActiveMQ: " + e.getMessage());
+        }
+    }
+
+    private boolean isNotReady() {
+        return producer == null || session == null;
+    }
+
+    private void publishEvents(List<WeatherEvent> weatherEvents) throws JMSException {
+        for (WeatherEvent event : weatherEvents) {
+            sendEvent(event);
         }
     }
 

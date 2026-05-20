@@ -15,48 +15,66 @@ public class EventConsumer {
     private Connection connection;
     private Session session;
 
-    public EventConsumer(String brokerUrl, FootballProcessor fp, WeatherProcessor wp) {
+    public EventConsumer(String brokerUrl, FootballProcessor footballProcessor, WeatherProcessor weatherProcessor) {
         this.brokerUrl = brokerUrl;
-        this.footballProcessor = fp;
-        this.weatherProcessor = wp;
+        this.footballProcessor = footballProcessor;
+        this.weatherProcessor = weatherProcessor;
         setupConnection();
     }
 
     private void setupConnection() {
         try {
-            ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
-            connection = factory.createConnection();
-            connection.start();
-            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            initActiveMQ();
         } catch (JMSException e) {
-            System.err.println("Error conectando a ActiveMQ: " + e.getMessage());
+            System.err.println("Error connecting to ActiveMQ: " + e.getMessage());
         }
+    }
+
+    private void initActiveMQ() throws JMSException {
+        ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
+        connection = factory.createConnection();
+        connection.start();
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
     public void subscribe(String topicName) {
         try {
-            Topic topic = session.createTopic(topicName);
-            MessageConsumer consumer = session.createConsumer(topic);
-            consumer.setMessageListener(message -> {
-                if (message instanceof TextMessage textMessage) {
-                    processIncomingMessage(textMessage, topicName);
-                }
-            });
+            registerTopicSubscriber(topicName);
         } catch (JMSException e) {
-            e.printStackTrace();
+            System.err.println("Error subscribing to topic " + topicName + ": " + e.getMessage());
+        }
+    }
+
+    private void registerTopicSubscriber(String topicName) throws JMSException {
+        Topic topic = session.createTopic(topicName);
+        MessageConsumer consumer = session.createConsumer(topic);
+        consumer.setMessageListener(message -> handleMessage(message, topicName));
+    }
+
+    private void handleMessage(Message message, String topicName) {
+        if (message instanceof TextMessage textMessage) {
+            processIncomingMessage(textMessage, topicName);
         }
     }
 
     private void processIncomingMessage(TextMessage textMessage, String topicName) {
         try {
-            JsonObject event = JsonParser.parseString(textMessage.getText()).getAsJsonObject();
-            if (topicName.equals("Football")) {
-                footballProcessor.processEvent(event);
-            } else if (topicName.equals("Weather")) {
-                weatherProcessor.processEvent(event);
-            }
+            dispatchMessageEvent(textMessage, topicName);
         } catch (Exception e) {
-            System.err.println("Error procesando mensaje de ActiveMQ: " + e.getMessage());
+            System.err.println("Error processing ActiveMQ message: " + e.getMessage());
+        }
+    }
+
+    private void dispatchMessageEvent(TextMessage textMessage, String topicName) throws Exception {
+        JsonObject event = JsonParser.parseString(textMessage.getText()).getAsJsonObject();
+        routeEventToProcessor(event, topicName);
+    }
+
+    private void routeEventToProcessor(JsonObject event, String topicName) {
+        if (topicName.equals("Football")) {
+            footballProcessor.processEvent(event);
+        } else if (topicName.equals("Weather")) {
+            weatherProcessor.processEvent(event);
         }
     }
 }

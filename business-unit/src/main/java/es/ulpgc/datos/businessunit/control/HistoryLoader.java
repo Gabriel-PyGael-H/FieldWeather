@@ -7,6 +7,7 @@ import es.ulpgc.datos.businessunit.control.eventprocessors.WeatherProcessor;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.stream.Stream;
 
 public class HistoryLoader {
     private final FootballProcessor footballProcessor;
@@ -26,24 +27,41 @@ public class HistoryLoader {
 
     private void loadFromPath(Path basePath, String topic) {
         if (!Files.exists(basePath)) return;
-        try (var stream = Files.walk(basePath)) {
+
+        try {
+            processPathStreams(basePath, topic);
+        } catch (IOException e) {
+            System.err.println("Error walking path " + basePath + ": " + e.getMessage());
+        }
+    }
+
+    private void processPathStreams(Path basePath, String topic) throws IOException {
+        try (Stream<Path> stream = Files.walk(basePath)) {
             stream.filter(p -> p.toString().endsWith(".events"))
                     .forEach(file -> parseEventFile(file, topic));
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     private void parseEventFile(Path file, String topic) {
         try {
-            Files.lines(file)
-                    .filter(line -> !line.isBlank())
+            readFileLines(file, topic);
+        } catch (IOException e) {
+            System.err.println("Error reading event file " + file + ": " + e.getMessage());
+        }
+    }
+    private void readFileLines(Path file, String topic) throws IOException {
+        try (Stream<String> lines = Files.lines(file)) {
+            lines.filter(line -> !line.isBlank())
                     .forEach(line -> processEventLine(line, topic));
-        } catch (Exception ignored) {}
+        }
     }
 
     private void processEventLine(String line, String topic) {
         JsonObject event = JsonParser.parseString(line).getAsJsonObject();
+        routeEvent(event, topic);
+    }
+
+    private void routeEvent(JsonObject event, String topic) {
         if (topic.equals("Football")) {
             footballProcessor.processEvent(event);
         } else if (topic.equals("Weather")) {

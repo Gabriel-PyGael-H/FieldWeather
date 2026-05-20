@@ -18,47 +18,69 @@ public class EventStoreListener {
     }
 
     public void subscribe(String topicName) {
-        new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                Connection connection = null;
-                Session session = null;
-                MessageConsumer consumer = null;
+        new Thread(() -> runSubscriptionLoop(topicName)).start();
+    }
 
-                try {
-                    ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
-                    connection = factory.createConnection();
-                    connection.setClientID(CLIENT_ID + "_" + topicName);
-                    connection.start();
-
-                    session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                    Topic topic = session.createTopic(topicName);
-                    consumer = session.createDurableSubscriber(topic, "sub-" + topicName);
-
-                    System.out.println("Suscrito a: " + topicName);
-                    while (!Thread.currentThread().isInterrupted()) {
-                        Message message = consumer.receive();
-                        if (message instanceof TextMessage textMessage) {
-                            String json = textMessage.getText();
-                            JsonObject event = JsonParser.parseString(json).getAsJsonObject();
-                            String ts = event.get("ts").getAsString();
-                            String ss = event.get("ss").getAsString();
-
-                            eventStore.store(topicName, ss, ts, json);
-                        }
-                    }
-                } catch (JMSException e) {
-                    System.err.println("Reconectando " + topicName + "... " + e.getMessage());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException ie) {
-                        break;
-                    }
-                } finally {
-                    try { if (consumer != null) consumer.close(); } catch (JMSException ignored) {}
-                    try { if (session != null) session.close(); } catch (JMSException ignored) {}
-                    try { if (connection != null) connection.close(); } catch (JMSException ignored) {}
-                }
+    private void runSubscriptionLoop(String topicName) {
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                connectAndListen(topicName);
+            } catch (JMSException e) {
+                handleConnectionFailure(topicName, e);
             }
-        }).start();
+        }
+    }
+    private void connectAndListen(String topicName) throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+
+        try {
+            ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
+            connection = factory.createConnection();
+            connection.setClientID(CLIENT_ID + "_" + topicName);
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic(topicName);
+            consumer = session.createDurableSubscriber(topic, "sub-" + topicName);
+
+            System.out.println("Subscribed to: " + topicName);
+            listenForMessages(consumer, topicName);
+        } finally {
+            closeResources(consumer, session, connection);
+        }
+    }
+    private void listenForMessages(MessageConsumer consumer, String topicName) throws JMSException {
+        while (!Thread.currentThread().isInterrupted()) {
+            Message message = consumer.receive();
+            processMessage(message, topicName);
+        }
+    }
+    private void processMessage(Message message, String topicName) throws JMSException {
+        if (message instanceof TextMessage textMessage) {
+            String json = textMessage.getText();
+            storeJsonEvent(json, topicName);
+        }
+    }
+    private void storeJsonEvent(String json, String topicName) {
+        JsonObject event = JsonParser.parseString(json).getAsJsonObject();
+        String ts = event.get("ts").getAsString();
+        String ss = event.get("ss").getAsString();
+        eventStore.store(topicName, ss, ts, json);
+    }
+
+    private void handleConnectionFailure(String topicName, JMSException e) {
+        System.err.println("Reconnecting " + topicName + "... " + e.getMessage());
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+    }
+    private void closeResources(MessageConsumer consumer, Session session, Connection connection) {
+        try { if (consumer != null) consumer.close(); } catch (JMSException ignored) {}
+        try { if (session != null) session.close(); } catch (JMSException ignored) {}
+        try { if (connection != null) connection.close(); } catch (JMSException ignored) {}
     }
 }

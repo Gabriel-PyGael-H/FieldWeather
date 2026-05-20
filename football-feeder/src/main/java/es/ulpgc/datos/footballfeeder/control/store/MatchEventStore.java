@@ -7,7 +7,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import javax.jms.*;
 import java.util.List;
 
-public class MatchEventStore implements MatchStore {
+public class MatchEventStore implements MatchStore, AutoCloseable {
 
     private static final String TOPIC_NAME = "Football";
     private static final String SOURCE_ID = "football-feeder";
@@ -26,11 +26,11 @@ public class MatchEventStore implements MatchStore {
             Destination destination = session.createTopic(TOPIC_NAME);
             this.producer = session.createProducer(destination);
         } catch (JMSException e) {
-            System.err.println("Error crítico inicializando ActiveMQ: " + e.getMessage());
-            throw new RuntimeException("No se pudo establecer conexión con el broker", e);
+            System.err.println("Error al inicializar ActiveMQ en MatchEventStore: " + e.getMessage());
         }
     }
 
+    @Override
     public void store(List<Match> matches) {
         if (producer == null || session == null) return;
 
@@ -45,17 +45,10 @@ public class MatchEventStore implements MatchStore {
             System.err.println("Error al publicar en ActiveMQ: " + e.getMessage());
         }
     }
-    public void close() {
-        try {
-            if (producer != null) producer.close();
-            if (session != null) session.close();
-            if (connection != null) connection.close();
-        } catch (JMSException ignored) {}
-    }
 
     private String buildEvent(Match match) {
-        MatchEvent event = new MatchEvent(
-                match.getMatchDate().toString() + "Z",
+        return gson.toJson(new MatchEvent(
+                match.getCapturedAt(),
                 SOURCE_ID,
                 match.getHomeTeam(),
                 match.getAwayTeam(),
@@ -65,8 +58,14 @@ public class MatchEventStore implements MatchStore {
                 match.getCompetition(),
                 match.getMatchDate().toString(),
                 match.getCity()
-        );
-        return gson.toJson(event);
+        ));
+    }
+
+    @Override
+    public void close() {
+        try { if (producer != null) producer.close(); } catch (JMSException ignored) {}
+        try { if (session != null) session.close(); } catch (JMSException ignored) {}
+        try { if (connection != null) connection.close(); } catch (JMSException ignored) {}
     }
 
     private record MatchEvent(

@@ -5,54 +5,72 @@ import java.sql.*;
 import java.util.List;
 
 public class DatabaseWeatherStore implements WeatherStore {
+    private static final String CREATE_TABLE_SQL = """
+            CREATE TABLE IF NOT EXISTS weather (
+                city            TEXT NOT NULL,
+                country         TEXT,
+                temperature     REAL,
+                feels_like      REAL,
+                humidity        INTEGER,
+                description     TEXT,
+                prediction_time TEXT NOT NULL,
+                captured_at     TEXT,
+                PRIMARY KEY (city, prediction_time)
+            );
+            """;
+
+    private static final String INSERT_WEATHER_SQL =
+            "INSERT OR REPLACE INTO weather (city, country, temperature, feels_like, humidity, description, prediction_time, captured_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
     private final Connection connection;
 
     public DatabaseWeatherStore(String databaseName) {
         try {
-            this.connection = DriverManager.getConnection("jdbc:sqlite:" + databaseName);
-            createTableIfNotExists();
+            this.connection = initConnection(databaseName);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+    private Connection initConnection(String databaseName) throws SQLException {
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + databaseName);
+        initializeDatabase(conn);
+        return conn;
+    }
 
-    private void createTableIfNotExists() {
-        String sql = """
-                CREATE TABLE IF NOT EXISTS weather (
-                    city            TEXT NOT NULL,
-                    country         TEXT,
-                    temperature     REAL,
-                    feels_like      REAL,
-                    humidity        INTEGER,
-                    description     TEXT,
-                    prediction_time TEXT NOT NULL,
-                    captured_at     TEXT,
-                    PRIMARY KEY (city, prediction_time)
-                );
-                """;
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute(sql);
-        } catch (SQLException e) {
-            System.err.println("Error al crear la tabla weather: " + e.getMessage());
+    private void initializeDatabase(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(CREATE_TABLE_SQL);
         }
     }
 
     @Override
     public void store(List<WeatherEvent> weatherEvents) {
-        String sql = "INSERT OR REPLACE INTO weather (city, country, temperature, feels_like, humidity, description, prediction_time, captured_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try {
+            executeStoreTransaction(weatherEvents);
+        } catch (SQLException e) {
+            System.err.println("Error saving data to database: " + e.getMessage());
+        }
+    }
+
+    private void executeStoreTransaction(List<WeatherEvent> weatherEvents) throws SQLException {
+        try (PreparedStatement pstmt = connection.prepareStatement(INSERT_WEATHER_SQL)) {
             connection.setAutoCommit(false);
-
-            for (WeatherEvent weather : weatherEvents) {
-                mapWeatherToStatement(pstmt, weather);
-                pstmt.addBatch();
-            }
-
-            pstmt.executeBatch();
+            processBatch(pstmt, weatherEvents);
             connection.commit();
         } catch (SQLException e) {
-            System.err.println("Error al guardar en la base de datos: " + e.getMessage());
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(true);
         }
+    }
+
+    private void processBatch(PreparedStatement pstmt, List<WeatherEvent> weatherEvents) throws SQLException {
+        for (WeatherEvent weather : weatherEvents) {
+            mapWeatherToStatement(pstmt, weather);
+            pstmt.addBatch();
+        }
+        pstmt.executeBatch();
     }
 
     private void mapWeatherToStatement(PreparedStatement pstmt, WeatherEvent weather) throws SQLException {
