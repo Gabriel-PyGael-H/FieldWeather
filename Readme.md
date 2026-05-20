@@ -34,27 +34,36 @@ Antes de abrir el código, ve a la carpeta donde descargaste ActiveMQ y arránca
 Paso 2: Configurar los parámetros (Arguments) en IntelliJ
 Como el proyecto tiene varios módulos independientes, cada uno tiene su propio archivo Main. Para que funcionen bien, hay que ir a las opciones de ejecución de IntelliJ (arriba a la derecha, en Edit Configurations...), buscar la casilla Program arguments y escribir los datos que necesita cada uno separados por un espacio:
 
-Event Store Builder: Necesita la URL de ActiveMQ y la carpeta donde va a guardar los ficheros de texto.
+Módulo event-store (EventStoreBuilderMain):
 
-Ejemplo de argumentos: tcp://localhost:61616 ./eventstore
+Parámetros esperados: https://activemq.apache.org/ [Ruta del directorio de eventos]
 
-Football Feeder: Necesita la clave de la API y la URL de ActiveMQ.
+Argumentos a introducir: tcp://localhost:61616 ./eventstore
 
-Ejemplo de argumentos: tu_api_key_futbol tcp://localhost:61616
+Módulo football-feeder (FootballFeederMain):
 
-Weather Feeder: Necesita la clave de la API y la URL de ActiveMQ.
+Parámetros esperados: https://deapi.ai/ [API Key] https://activemq.apache.org/
 
-Ejemplo de argumentos: tu_api_key_clima tcp://localhost:61616
+Argumentos a introducir: https://api.football-data.org/v4/competitions/PD/matches f0f10c49cbc74e138b4f475318abdac1 tcp://localhost:61616
 
-Business Unit: Necesita la URL de ActiveMQ, la ruta de la carpeta de eventos y el puerto de la web.
+Módulo weather-feeder (WeatherFeederMain):
 
-Ejemplo de argumentos: tcp://localhost:61616 ./eventstore 8080
+Parámetros esperados: https://www.notion.com/templates/api-template https://activemq.apache.org/
 
-Paso 3: Darle al botón de Play
-Simplemente abre el archivo Main de cada módulo y dale al botón verde de Run / Play en tu entorno de desarrollo. Al estar todos encendidos a la vez, el sistema empezará a funcionar en tiempo real.
+Argumentos a introducir: https://api.openweathermap.org/data/2.5/forecast?q=%s&appid=0ac1d3838cfb84d1f1a6ae57fc7d91e7&units=metric tcp://localhost:61616
 
+Módulo business-unit (BusinessUnitMain):
 
+Parámetros esperados: https://activemq.apache.org/ [Ruta del directorio de eventos] [Puerto del servicio Web]
 
+Argumentos a introducir: tcp://localhost:61616 ./eventstore 7000
+
+Paso 3: Inicialización del Sistema
+Asegúrate de tener levantado el broker local de Apache ActiveMQ (localhost:8161).
+
+Ejecuta secuencialmente (botón verde de Run / Play o Shift + F10) los componentes. Se recomienda el siguiente orden: EventStore, BusinessUnit, y finalmente ambos Feeders.
+
+Una vez activos, la API REST y la interfaz web estarán disponibles inmediatamente en el endpoint local configurado: http://localhost:7000
 ### 4. Ejemplos de uso
 
 Requisitos del Entorno
