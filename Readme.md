@@ -8,11 +8,11 @@ Propuesta de valor: El sistema cruza las fechas y lugares de los partidos con el
 
 ### 2. Justificación de la elección de APIs y estructura del Datamart
 Elección de APIs
-API de Fútbol: Nos da de forma fiable los partidos, los equipos que juegan, las fechas y los resultados en formatos limpios (JSON) para poder extraerlos fácilmente.
+# API de Fútbol: Nos da de forma fiable los partidos, los equipos que juegan, las fechas y los resultados en formatos limpios (JSON) para poder extraerlos fácilmente.
 
-API del Clima: Nos permite conocer la temperatura, humedad y el pronóstico exacto de la ciudad en la que se juega cada partido justo en las horas cercanas al encuentro.
+# API del Clima: Nos permite conocer la temperatura, humedad y el pronóstico exacto de la ciudad en la que se juega cada partido justo en las horas cercanas al encuentro.
 
-Estructura del Datamart
+# Estructura del Datamart
 Hemos elegido SQLite para nuestra base de datos por una razón muy sencilla: funciona directamente sobre un archivo local (datamart.db). No hace falta instalar ni configurar ningún servidor de bases de datos externo en el ordenador, lo que hace que todo sea mucho más rápido de montar.
 
 Además, toda la información se guarda de forma desnormalizada en una única tabla llamada match_weather. Al tener los datos del partido, del tiempo y la recomendación calculada en la misma fila, la API web (Javalin) puede leerlos al instante para mostrárselos al usuario sin ralentizar el sistema con búsquedas complejas.
@@ -28,10 +28,10 @@ Descargar y arrancar Apache ActiveMQ (el broker de mensajería que usamos para c
 Tener las claves (API Keys) de las plataformas de fútbol y clima.
 
 Pasos para arrancar el sistema
-Paso 1: Encender ActiveMQ
+# Paso 1: Encender ActiveMQ
 Antes de abrir el código, ve a la carpeta donde descargaste ActiveMQ y arráncalo. Esto hará que el puerto tcp://localhost:61616 se quede escuchando los mensajes.
 
-Paso 2: Configurar los parámetros (Arguments) en IntelliJ
+# Paso 2: Configurar los parámetros (Arguments) en IntelliJ
 Como el proyecto tiene varios módulos independientes, cada uno tiene su propio archivo Main. Para que funcionen bien, hay que ir a las opciones de ejecución de IntelliJ (arriba a la derecha, en Edit Configurations...), buscar la casilla Program arguments y escribir los datos que necesita cada uno separados por un espacio:
 
 Módulo event-store (EventStoreBuilderMain):
@@ -58,7 +58,7 @@ Parámetros esperados: https://activemq.apache.org/ [Ruta del directorio de even
 
 Argumentos a introducir: tcp://localhost:61616 ./eventstore 7000
 
-Paso 3: Inicialización del Sistema
+# Paso 3: Inicialización del Sistema
 Asegúrate de tener levantado el broker local de Apache ActiveMQ (localhost:8161).
 
 Ejecuta secuencialmente (botón verde de Run / Play o Shift + F10) los componentes. Se recomienda el siguiente orden: EventStore, BusinessUnit, y finalmente ambos Feeders.
@@ -74,28 +74,28 @@ Apache ActiveMQ: Broker de mensajes compatible con JMS, inicializado localmente 
 Configuración de Parámetros de Ejecución (Program Arguments)
 Para simular la topología distribuida dentro del IDE (como IntelliJ IDEA), configure los siguientes argumentos de programa en las opciones de ejecución de cada clase Main (Run ➡️ Edit Configurations... ➡️ Program arguments):
 
-Event Store Builder: * Program arguments: tcp://localhost:61616 ../eventstore
+# Event Store Builder: * Program arguments: tcp://localhost:61616 ../eventstore
 
 (Registra la secuencia exacta e inmutable de eventos en la ruta relativa especificada).
 
-Business Unit: * Program arguments: tcp://localhost:61616 ../eventstore 7000
+# Business Unit: * Program arguments: tcp://localhost:61616 ../eventstore 7000
 
 (El núcleo analítico. Lee el histórico en frío desde la ruta relativa, procesa el tiempo real y levanta la API web en el puerto 7000).
 
-Football Feeder: * Program arguments: tcp://localhost:61616 https://api.football-data.org/v4/matches?X-Auth-Token=TU_API_KEY
+# Football Feeder: * Program arguments: tcp://localhost:61616 https://api.football-data.org/v4/matches?X-Auth-Token=TU_API_KEY
 
 (Conecta al broker local e ingesta los datos deportivos mediante la URL base y su correspondiente API Key).
 
-Weather Feeder: * Program arguments: tcp://localhost:61616 https://api.openweathermap.org/data/2.5/forecast?appid=TU_API_KEY
+# Weather Feeder: * Program arguments: tcp://localhost:61616 https://api.openweathermap.org/data/2.5/forecast?appid=TU_API_KEY
 
 (Conecta al broker local e ingesta las predicciones meteorológicas enviando los datos en tiempo real).
 
 
-Paso 1: Inicie el servidor local de Apache ActiveMQ y asegúrese de que esté escuchando en tcp://localhost:61616.
+# Paso 1: Inicie el servidor local de Apache ActiveMQ y asegúrese de que esté escuchando en tcp://localhost:61616.
 
-Paso 2: Ejecute los módulos de persistencia y procesamiento (Event Store Builder y Business Unit). Esto garantiza que las colas y tópicos estén listos para recibir y procesar datos, e inicializa el servicio web en el puerto 7000.
+# Paso 2: Ejecute los módulos de persistencia y procesamiento (Event Store Builder y Business Unit). Esto garantiza que las colas y tópicos estén listos para recibir y procesar datos, e inicializa el servicio web en el puerto 7000.
 
-Paso 3: Ejecute los flujos emisores (Football Feeder y Weather Feeder) para comenzar con la ingesta dinámica de datos y comprobar el procesamiento en tiempo real durante la presentación.
+# Paso 3: Ejecute los flujos emisores (Football Feeder y Weather Feeder) para comenzar con la ingesta dinámica de datos y comprobar el procesamiento en tiempo real durante la presentación.
 
 Una vez que business-unit esté en ejecución, levanta una API REST en el puerto 7000. Puedes acceder a los datos mediante las siguientes rutas:
 
